@@ -7,7 +7,9 @@ var Question = Backbone.Model.extend({
 			succes_rate:0,
 			clue:"",
 			answer:"",
-			doid:""
+			doid:"",
+			choice_list:[],
+			correct_index:0
 		},
 		idAttribute:'question_id'
 	      });
@@ -18,5 +20,17 @@ var QuestCollection = Backbone.Collection.extend({
 				url:'/questions'
 				
 			});
+
+var Diseases = Backbone.Model.extend({
+			defaults:{
+				disease_id:-1,
+				disease_name:""
+			},
+			idAttribute:'disease_id'
+		});
+var DiseasesCollection = Backbone.Collection.extend({
+				model:Diseases,
+				url:'/diseases'
+			 });
 
 

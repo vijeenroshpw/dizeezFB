@@ -3,6 +3,7 @@ import json
 import MySQLdb
 import facebook
 import config
+import fetcher
 
 USERNAME = config.USERNAME
 PASSWORD = config.PASSWORD
@@ -28,6 +29,18 @@ def game():
 		return render_template('game.html')
 	else:
 		return render_template('game.html')
+
+@app.route('/test',methods=['GET','POST'])
+def test():
+	return 	render_template('test.html')
+
+@app.route('/questions',methods=['GET','POST'])
+def questions():
+	return fetcher.getQuestions()
+
+@app.route('/diseases',methods=['GET','POST'])
+def diseases():	
+	return fetcher.getDiseases()
 
 if __name__ == '__main__':
 	app.run()

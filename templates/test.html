@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+	<script type="text/javascript" src="/static/js/lib/underscore-min.js"></script>
+	<script type="text/javascript"  src="/static/js/lib/jquery-min.js"></script>
+	<script type="text/javascript"  src="/static/js/lib/backbone-min.js"></script>
+	<script type="text/javascript"  src="/static/js/models.js"></script>
+	<script type="text/javascript">
+
+				
+			
+		
+			var questcoll = new QuestCollection([]);
+	       		questcoll.fetch({async:false});
+			console.log(questcoll.at(3).get('question_id'));
+			console.log("success !!!");
+		
+	
+			var discoll = new DiseasesCollection([]);
+			discoll.fetch({async:false});
+			console.log(discoll.get(3));
+			console.log("success");
+		
+	</script>
+</body>
+</html>

@@ -2,7 +2,7 @@ import MySQLdb
 import json
 import random
 def getQuestions(category = 0):
-	db = MySQLdb.connect('localhost','root','root','dizeeztest')
+	db = MySQLdb.connect('localhost','root','root','dizeeztest1')
 	cursor = db.cursor()
 	cursor.execute("SELECT * FROM Questions ORDER BY RAND() LIMIT 0,50")
 	results = cursor.fetchall()
