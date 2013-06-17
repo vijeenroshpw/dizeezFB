@@ -1,8 +1,15 @@
 import MySQLdb
 import json
 import random
+import config
+
+DBUSER = config.USERNAME
+DBPASS = config.PASSWORD
+DBNAME = config.DBNAME
+DBHOST = config.DBHOST
+
 def getQuestions(category = 0):
-	db = MySQLdb.connect('localhost','root','root','dizeeztest1')
+	db = MySQLdb.connect(DBHOST,DBUSER,DBPASS,DBNAME)
 	cursor = db.cursor()
 	cursor.execute("SELECT * FROM Questions ORDER BY RAND() LIMIT 0,50")
 	results = cursor.fetchall()
@@ -18,7 +25,7 @@ def getQuestions(category = 0):
 	return  json.dumps(quests)
 
 def getDiseases():
-	db = MySQLdb.connect('localhost','root','root','dizeeztest')
+	db = MySQLdb.connect(DBHOST,DBUSER,DBPASS,DBNAME)
 	cursor = db.cursor()
 	cursor.execute("SELECT * FROM Diseases ")
 	results = cursor.fetchall()
