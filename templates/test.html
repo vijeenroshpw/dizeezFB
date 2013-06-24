@@ -17,9 +17,11 @@
       console.log(questcoll.at(3).get('question_id'));
       console.log("success !!!");
 
-      discoll.fetch({async:false});
-      console.log(discoll.get(3));
-      console.log("success");
+      discoll.fetch({success: function(res) {
+        console.log( 'Success :: ', res);
+      }});
+      // console.log(discoll.get(3));
+      // console.log("success");
 
   </script>
 </body>
