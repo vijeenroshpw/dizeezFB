@@ -7,6 +7,7 @@ import config
 import random
 
 APP_SECRET = config.APP_SECRET
+AUTH_URL = config.AUTH_URL
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.CONNECTION_URI
