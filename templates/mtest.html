@@ -1,0 +1,205 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-min.css">
+    <style type='text/css'>
+	#canvas{
+		border: solid black 2px;
+		height:300px;
+		width:500px;
+		/*margin-left:0px;*/
+		/*margin-top:100px;*/
+		position:fixed;
+		top:100px;
+		
+	}
+	#question{
+		border:solid red 2px;
+		height:230px;         
+		width:480px;
+		margin-left:5px;
+		margin-top: 20px;
+		/*position:fixed;
+		//left:5px;
+		//top:165px; */
+	}
+	#actions{
+		position:fixed;
+		height:300px;
+		width:200px;
+		left:505px;
+		top:100px;
+		border:solid black 2px;
+	}
+	#friends{
+		position:fixed;
+		border:solid black 2px;
+		top:405px;
+		left:0px;
+		width:705px;
+		height:100px;
+	}
+	#player{
+		border:solid black 2px;
+		margin-top:5px;
+		margin-left:45px;
+		height:100px;
+		width:100px;
+	}
+
+	#time{
+		border:solid black 2px;
+		/*position:fixed;*/
+		width:100px;
+		height:25px;
+		margin-left:10px;
+		margin-top:10px;
+		/*top:120px;*/
+		/*left:40px;*/
+	}
+	#score{
+		border:solid black 2px;
+		width:100px;
+		height:25px;
+		margin-left:380px;
+		margin-top : -29px;
+	}
+	#startbutton {
+		margin-left:180px;
+		margin-top: 130px;
+	}
+     </style>
+	
+		  
+</head>
+<body>
+	<script type="text/javascript" src="/static/js/lib/underscore-min.js"></script>
+	<script type="text/javascript"  src="/static/js/lib/jquery-min.js"></script>
+	<script type="text/javascript"  src="/static/js/lib/backbone-min.js"></script>
+	<script type="text/javascript"  src="/static/js/models.js"></script>
+	<script type="text/javascript" src="/static/js/views.js"></script>
+	<script type="text/javascript" src="/static/js/helper.js"></script>
+	<script type="text/javascript">
+
+				
+			
+	</script>
+	<div id=actions>
+		 <!-- Action Contents goes Here --> 
+		<div id=player> 
+			<!-- Player Contents goes here --> 
+		</div>
+		<center>
+			<button class='btn btn-primary' style='margin-top:50px;width:150px;'> Achievements </button> <br/>
+		</center>
+		<center>
+			<button class='btn btn-success' style='margin-top:10px;width:150px;'> Chellenge Game </button><br/>
+		</center>
+		<center>
+			<button class='btn btn-danger' style='margin-top:10px;width:150px;'> Feedback </button><br/>
+		</center>
+
+	</div>
+	<div id=friends> 
+		<!-- Friends list goes here --> 
+	</div>
+
+	<div id='canvas'> 
+		<!-- game contents goes here -->	
+		
+		 <div id=time> 
+			TIME : 00 
+		</div>
+		<div id=score>
+			SCORE: 00
+		</div>   
+
+                <div id='question'>
+			<!-- Questions Goes here -->		
+		</div> 
+		<button class='btn btn-primary' id='startbutton' onclick='startGame()'> Start Game </button> 
+	</div>
+	
+	<script type='text/javascript'>
+		var questcoll = new QuestCollection([]);
+	       	questcoll.fetch({async:false});
+		
+		var discoll = new DiseasesCollection([]);
+		discoll.fetch({async:false});
+		
+		disnames = discoll.pluck('disease_name');
+		
+		//-- Hides time , score , question divs at end  of game
+		function hideAll() {
+			$('#time').hide();
+			$('#score').hide();
+			$('#question').hide();
+		}
+
+		//-- Shows time,score,question divs at start of game
+		function showAll() {
+			$('#time').show();
+			$('#score').show();
+			$('#question').show();
+		}
+		
+		var game={};
+		game.qn = 0;
+		game.score = 0;
+		game.time = 5;            //-- for testing purposes . change to 60
+		game.timeHandle = null;
+		var qv = new QuestionView();
+		
+			
+		function timeUpdate() {
+				if(game.time <= 0) {
+					alert(" Time's up Buddy !!!");
+					window.clearInterval(game.timeHandle);
+					endGame();       
+				} else {
+					game.time--;
+					$('#time').html("TIME:"+game.time);
+				}
+		}
+		
+		function startGame() {
+			showAll();
+			$('#startbutton').hide();     //-- hides the start button
+			game.timeHandle = window.setInterval(timeUpdate,1000);	
+			qv.render(getOptionNames(questcoll.at(game.qn)),questcoll.at(game.qn));
+		}
+		
+		function endGame() {
+			hideAll();
+			$('#startbutton').show();
+			game.time = 60;
+			game.qn = 0;
+		}
+		
+
+		function nextQuestion() {
+			
+			// Update Score 
+			if(parseInt($('input[name="answer"]:checked').val()) == questcoll.at(game.qn).get('correct_index')) {
+				game.score += 10;
+				$("#score").html("SCORE:" + game.score);
+			}
+			//high light correct answer
+			$('#option'+questcoll.at(game.qn).get('correct_index')).css('color','#00ff00');			
+			
+			//next question 
+			game.qn++;
+			qv.render(getOptionNames(questcoll.at(game.qn)),questcoll.at(game.qn));
+		}
+		
+		//start the game 
+		hideAll();
+		//startGame();
+	
+	</script>
+
+
+</body>
+</html>
