@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-min.css">
-    <!-- A Page to test the functionality . After each test is performed here, the changes are reflected -->
-    <!-- In the test.html page in a "sexy" form --> 
     <style type='text/css'>
 	#canvas{
 		border: solid black 2px;
@@ -126,7 +124,7 @@
 	
 	<script type='text/javascript'>
 		var questcoll = new QuestCollection([]);
-	       	questcoll.fetch({async:false});
+	       	questcoll.fetch({async:false,'url':"{{ fetch_url|safe }}"});
 		
 		var discoll = new DiseasesCollection([]);
 		discoll.fetch({async:false});

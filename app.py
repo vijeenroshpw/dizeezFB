@@ -92,19 +92,25 @@ def game():
 	else:
 		return render_template('game.html')
 
-
+############################################
 @app.route('/test',methods=['GET','POST'])
 def test():
 	return 	render_template('test.html')
+############################################
 
-@app.route('/mtest',methods=['GET','POST'])
-def mtest():
-	return render_template('mtest.html')
+@app.route('/play/<category>',methods=['GET','POST'])
+def mtest(category=0):
+	return render_template('play.html',fetch_url = '/questions/'+category)
 
 @app.route('/questions',methods=['GET','POST'])
 def questions():
 	return fetch_questions()
 
+#########################################################
+@app.route('/questions/<category>',methods=['GET','POST'])
+def questions_cat(category):
+	return fetch_questions(int(category))
+#########################################################
 
 @app.route('/diseases',methods=['GET','POST'])
 def diseases():	
