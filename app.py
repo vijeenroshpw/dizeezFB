@@ -95,7 +95,8 @@ def game():
 ############################################
 @app.route('/test',methods=['GET','POST'])
 def test():
-	return 	render_template('test.html')
+	#return render_template('test.html')
+	return render_template('app.html')
 ############################################
 
 @app.route('/play/<category>',methods=['GET','POST'])
