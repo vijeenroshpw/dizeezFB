@@ -14,18 +14,17 @@ app.config['SQLALCHEMY_DATABASE_URI'] = config.CONNECTION_URI
 
 db  = SQLAlchemy(app)
 
-
 class Questions(db.Model):
-	id = db.Column(db.Integer,primary_key = True)
-	clue_id = db.Column(db.String(20))
-	clue_name = db.Column(db.String(20))
-	succes_rate = db.Column(db.Integer)
-	clue = db.Column(db.String(50))
-	answer = db.Column(db.String(50))
-	doid = db.Column(db.String(15))
-	wrong_diseases = db.Column(db.String(50))
-	correct_id = db.Column(db.Integer)
-	categories = db.Column(db.String(50))
+  id              = db.Column(db.Integer,primary_key = True)
+  clue_id         = db.Column(db.String(20))
+  clue_name       = db.Column(db.String(20))
+  succes_rate     = db.Column(db.Integer)
+  clue            = db.Column(db.String(50))
+  answer          = db.Column(db.String(50))
+  doid            = db.Column(db.String(15))
+  wrong_diseases  = db.Column(db.String(50))
+  correct_id      = db.Column(db.Integer)
+  categories      = db.Column(db.String(50))
 
 	def __init__(self, clue_id,clue_name,success_rate,clue,answer,doid,wrong_diseases,correct_id,categories):
 		self.clue_id = clue_id
@@ -119,5 +118,3 @@ def diseases():
 
 if __name__ == '__main__':
 	app.run()
-
-
