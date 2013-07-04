@@ -1,0 +1,66 @@
+	#canvas{
+		border: solid black 2px;
+		height:300px;
+		width:500px;
+		/*margin-left:0px;*/
+		/*margin-top:100px;*/
+		position:fixed;
+		top:100px;
+		
+	}
+	#question{
+		border:solid red 2px;
+		height:230px;         
+		width:480px;
+		margin-left:5px;
+		margin-top: 20px;
+		/*position:fixed;
+		//left:5px;
+		//top:165px; */
+	}
+	#actions{
+		position:fixed;
+		height:300px;
+		width:200px;
+		left:505px;
+		top:100px;
+		border:solid black 2px;
+	}
+	#friends{
+		position:fixed;
+		border:solid black 2px;
+		top:405px;
+		left:0px;
+		width:705px;
+		height:100px;
+	}
+	#player{
+		border:solid black 2px;
+		margin-top:5px;
+		margin-left:45px;
+		height:100px;
+		width:100px;
+	}
+
+	#time{
+		border:solid black 2px;
+		/*position:fixed;*/
+		width:100px;
+		height:25px;
+		margin-left:10px;
+		margin-top:10px;
+		/*top:120px;*/
+		/*left:40px;*/
+	}
+	#score{
+		border:solid black 2px;
+		width:100px;
+		height:25px;
+		margin-left:380px;
+		margin-top : -29px;
+	}
+	#startbutton {
+		margin-left:180px;
+		margin-top: 130px;
+	}
+ 

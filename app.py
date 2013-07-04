@@ -26,19 +26,19 @@ class Questions(db.Model):
   correct_id      = db.Column(db.Integer)
   categories      = db.Column(db.String(50))
 
-	def __init__(self, clue_id,clue_name,success_rate,clue,answer,doid,wrong_diseases,correct_id,categories):
-		self.clue_id = clue_id
-		self.clue_name = clue_name
-		self.success_rate = success_rate
-		self.clue = clue
-		self.answer = answer
-		self.doid = doid
-		self.wrong_diseases = wrong_diseases
-		self.correct_id = correct_id
-		self.categories = categories
+  def __init__(self, clue_id,clue_name,success_rate,clue,answer,doid,wrong_diseases,correct_id,categories):
+    self.clue_id = clue_id
+    self.clue_name = clue_name
+    self.success_rate = success_rate
+    self.clue = clue
+    self.answer = answer
+    self.doid = doid
+    self.wrong_diseases = wrong_diseases
+    self.correct_id = correct_id
+    self.categories = categories
 	
-	def __repr__(self):
-		return "<Question Clue : %s>"%(self.clue)
+  def __repr__(self):
+    return "<Question Clue : %s>"%(self.clue)
 
 class Diseases(db.Model):
 	id = db.Column(db.Integer,primary_key = True)
@@ -102,17 +102,17 @@ def test():
 def mtest(category=0):
 	return render_template('play.html',fetch_url = '/questions/'+category)
 
-@app.route('/questions',methods=['GET','POST'])
+@app.route('/api/v1/questions',methods=['GET','POST'])
 def questions():
 	return fetch_questions()
 
 #########################################################
-@app.route('/questions/<category>',methods=['GET','POST'])
+@app.route('/api/v1/questions/<category>',methods=['GET','POST'])
 def questions_cat(category):
 	return fetch_questions(int(category))
 #########################################################
 
-@app.route('/diseases',methods=['GET','POST'])
+@app.route('/api/v1/diseases',methods=['GET','POST'])
 def diseases():	
 	return fetch_diseases()
 
