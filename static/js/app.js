@@ -28,7 +28,7 @@ var Question = Backbone.Model.extend({
 });
 
 var Diseases = Backbone.Model.extend({
-  idAttribute:'disease_id'
+  idAttribute:'disease_id',
   defaults : {
     disease_id    : -1,
     disease_name  : ""
@@ -68,10 +68,11 @@ var QuestionView = Backbone.View.extend({
     isTrue : function() {
       var $question = $('input[name="answer"]:checked');
       if ( parseInt($question.val()) == DIZEEZ_FB.questcoll.at(DIZEEZ_FB.quest_number).get('correct_index') ) {
-        return true
+        return true;
       } else {
         return false;
       }
+    }
     });
 
 //
