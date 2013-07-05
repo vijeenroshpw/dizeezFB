@@ -70,7 +70,21 @@
 	
 	<script type='text/javascript' src='/static/js/app.js'></script>
 	<script type='text/javascript'>
-		DIZEEZ_FB.start();
+                //--hide the  question , time , score 
+		$("#question,#time,#score,#startbutton").hide();
+	
+		DIZEEZ_FB.questcoll.fetch({success:function() { 
+						DIZEEZ_FB.discoll.fetch({success:function(){
+                                                                          DIZEEZ_FB.disname = DIZEEZ_FB.discoll.pluck('disease_name');
+                                                                          $("#startbutton").show();
+                                                                        }});
+                                                },'url':"{{ fetch_url|safe }}"});
+	
+		function startGame() {
+			$("#question,#time,#score").show();
+			$("#startbutton").hide();
+			DIZEEZ_FB.start();
+		}
 	</script>
 
 

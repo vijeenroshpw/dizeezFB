@@ -100,7 +100,7 @@ var DIZEEZ_FB = {};
 
 DIZEEZ_FB.quest_number = 0;
 DIZEEZ_FB.score = 0;
-DIZEEZ_FB.time = 60;
+DIZEEZ_FB.time = 4;
 DIZEEZ_FB.question_view = new QuestionView();
 DIZEEZ_FB.scoreview = null;                  //-- will be populated by star() method
 DIZEEZ_FB.timeHandle = null;
@@ -108,6 +108,7 @@ DIZEEZ_FB.timeUpdate = function() {
   if(DIZEEZ_FB.time <= 0) {
     alert("Time's Up Buddy !!!");
     window.clearInterval(DIZEEZ_FB.timeHandle);
+    DIZEEZ_FB.end();
   } else {
     DIZEEZ_FB.time--;
     $("#time").html("TIME:"+DIZEEZ_FB.time);
@@ -121,12 +122,8 @@ DIZEEZ_FB.start = function() {
 }
 
 DIZEEZ_FB.end = function() {
-  DIZEEZ_FB.time = 60;
-  DIZEEZ_FB.score = 0;
+	$('#canvas').html("<div id=scoreboard style='margin-left:180px;margin-top:130px;'> YOUR SCORE : " + DIZEEZ_FB.score + "<br/><a href=/game > Play Another Game </a></div>"); 
 }
 
 DIZEEZ_FB.discoll = new DiseasesCollection({});
 DIZEEZ_FB.questcoll = new QuestCollection({});
-DIZEEZ_FB.questcoll.fetch({async:false}); // TODO Convert to Callback
-DIZEEZ_FB.discoll.fetch({async:false});   // TODO Convert to Callback
-DIZEEZ_FB.disname = DIZEEZ_FB.discoll.pluck('disease_name');

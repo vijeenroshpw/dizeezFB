@@ -100,7 +100,7 @@ def test():
 
 @app.route('/play/<category>',methods=['GET','POST'])
 def mtest(category=0):
-	return render_template('play.html',fetch_url = '/questions/'+category)
+	return render_template('app.html',fetch_url = '/api/v1/questions/'+category)
 
 @app.route('/api/v1/questions',methods=['GET','POST'])
 def questions():
