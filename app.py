@@ -5,9 +5,10 @@ import json
 import facebook
 import config
 import random
-
+import sys
 APP_SECRET = config.APP_SECRET
 AUTH_URL = config.AUTH_URL
+APP_ID = config.APP_ID
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.CONNECTION_URI
@@ -84,6 +85,22 @@ def game():
 	if request.method == 'POST':
 		if 'signed_request' in request.form:
 			print " Yes Signed Request obtained"
+			
+			
+			#parsing signed request obtained
+			sr_data = facebook.parse_signed_request(request.form['signed_request'],APP_SECRET)
+			#getting the graph object
+			graph = facebook.GraphAPI(sr_data['oauth_token'])
+			#obtains self profile
+			profile = graph.get_object("me")
+			#gets list of my frineds
+			friends = graph.get_connections("me","friends")
+			#gets the list of players who plays this game + score
+			scores = graph.get_object("/"+APP_ID+"/scores")
+			
+			#Homework to be done 
+                           #1 getting profile pics of friends
+                           	
 		else:
 			print " No Signed Request Obtained"
 
