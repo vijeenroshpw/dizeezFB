@@ -1,20 +1,47 @@
 from flask import Flask,render_template,request
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.sql.expression import func
+from flask.ext.restful import Resource, Api
+
 import json
 import facebook
 import config
 import random
 import sys
+import urllib
+
+#-- fetch necessary app parameters to global scope 
 APP_SECRET = config.APP_SECRET
 AUTH_URL = config.AUTH_URL
 APP_ID = config.APP_ID
 
+#-- global app object
 app = Flask(__name__)
+
+#-  connection url , specifying location, port , username , password , dbname 
 app.config['SQLALCHEMY_DATABASE_URI'] = config.CONNECTION_URI
 
+#-- Global database handle
 db  = SQLAlchemy(app)
 
+#-- Global restful api handle
+api = Api(app)
+
+#-- Questions Resource ,    /api/v1/questions/1 returns list of questions (in JSON) questin belong to category 1
+class QuestionsResource(Resource):
+	def get(self,category):
+		return fetch_questions(int(category))
+		
+#-- Diseases Resource     /api/v1/diseases  returns list of all diseases (in JSON)
+class DiseasesResource(Resource):
+	def get(self):
+		return fetch_diseases()
+
+#-- Configuring api urls
+api.add_resource(QuestionsResource,'/api/v1/questions/<string:category>')
+api.add_resource(DiseasesResource,'/api/v1/diseases')
+
+	
 class Questions(db.Model):
   id              = db.Column(db.Integer,primary_key = True)
   clue_id         = db.Column(db.String(20))
@@ -62,7 +89,7 @@ def fetch_questions(category = 0):
 		rand_choices.append(result.correct_id)
 		random.shuffle(rand_choices)
 		quests.append(dict(question_id = result.id,clue_id = result.clue_id,clue_name = result.clue_name,success_rate = result.succes_rate,clue = result.clue,answer = result.answer,doid = result.doid,choice_list = rand_choices,correct_index = rand_choices.index(result.correct_id)))
-	return json.dumps(quests)
+	return quests
 
 	
 def fetch_diseases():
@@ -70,7 +97,7 @@ def fetch_diseases():
 	diseases = []
 	for result in results:
 		diseases.append(dict(disease_id = result.id,disease_name = result.disease_name))
-	return json.dumps(diseases)
+	return diseases
 
 
 
@@ -97,7 +124,19 @@ def game():
 			friends = graph.get_connections("me","friends")
 			#gets the list of players who plays this game + score
 			scores = graph.get_object("/"+APP_ID+"/scores")
-			
+			print scores
+			for player in scores['data']:
+				print player['user']['name'],player['score'],player['user']['id']
+
+				
+			try:
+				#stuff = graph.get_object("https://graph.facebook.com/me/picture",redirect=False)
+			        stuff = urllib.urlopen("https://graph.facebook.com/me/picture?redirect=false&access_token="+sr_data['oauth_token'])
+					
+				print stuff.read()
+			except:
+				print sys.exc_info()
+
 			#Homework to be done 
                            #1 getting profile pics of friends
                            	
@@ -108,30 +147,13 @@ def game():
 	else:
 		return render_template('game.html')
 
-############################################
-@app.route('/test',methods=['GET','POST'])
-def test():
-	#return render_template('test.html')
-	return render_template('app.html')
-############################################
 
 @app.route('/play/<category>',methods=['GET','POST'])
 def mtest(category=0):
 	return render_template('app.html',fetch_url = '/api/v1/questions/'+category)
 
-@app.route('/api/v1/questions',methods=['GET','POST'])
-def questions():
-	return fetch_questions()
 
-#########################################################
-@app.route('/api/v1/questions/<category>',methods=['GET','POST'])
-def questions_cat(category):
-	return fetch_questions(int(category))
-#########################################################
 
-@app.route('/api/v1/diseases',methods=['GET','POST'])
-def diseases():	
-	return fetch_diseases()
 
 if __name__ == '__main__':
 	app.run()
