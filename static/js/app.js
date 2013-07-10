@@ -1,6 +1,34 @@
 //
 //-- Models
 //
+
+QuestModel = Backbone.RelationalModel.extend({
+	idAttribute:'question_id',
+	 defaults : {
+    	   question_id   : -1,
+           clue_id       : -1,
+           clue_name     : "",
+           succes_rate   : 0,
+           clue          : "",
+           answer        : "",
+           doid          : "",
+           choice_list   : [],
+           correct_index : 0
+        },
+
+	relations: [{
+		type: Backbone.HasMany,
+		key: 'choices_collection',
+		relatedModel: 'Diseases',
+		collectionType: 'DiseasesCollection',
+		reverseRelation: {
+			key: 'question',
+			includeInJSON: 'question_id'
+			// 'relatedModel' is automatically set to 'Zoo'; the 'relationType' to 'HasOne'.
+		}
+	}]
+});
+
 var Question = Backbone.Model.extend({
   idAttribute : 'question_id',
   defaults : {
@@ -27,7 +55,7 @@ var Question = Backbone.Model.extend({
   }
 });
 
-var Diseases = Backbone.Model.extend({
+var Diseases = Backbone.RelationalModel.extend({
   idAttribute:'disease_id',
   defaults : {
     disease_id    : -1,
@@ -91,6 +119,43 @@ var QuestCollection = Backbone.Collection.extend({
 var DiseasesCollection = Backbone.Collection.extend({
   model:Diseases,
   url:'/api/v1/diseases'
+});
+
+
+
+
+/*
+QuestModel = Backbone.RelationalModel.extend({
+	idAttribute:'question_id',
+	 defaults : {
+    	   question_id   : -1,
+           clue_id       : -1,
+           clue_name     : "",
+           succes_rate   : 0,
+           clue          : "",
+           answer        : "",
+           doid          : "",
+           choice_list   : [],
+           correct_index : 0
+        },
+
+	relations: [{
+		type: Backbone.HasMany,
+		key: 'choices_collection',
+		relatedModel: 'Diseases',
+		collectionType: 'DiseasesCollection',
+		reverseRelation: {
+			key: 'question',
+			includeInJSON: 'question_id'
+			// 'relatedModel' is automatically set to 'Zoo'; the 'relationType' to 'HasOne'.
+		}
+	}]
+});
+*/
+
+var QuestModelCollection = Backbone.Collection.extend({
+  model:QuestModel,
+  url:'/api/v1/testapi'
 });
 
 //
