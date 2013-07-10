@@ -37,11 +37,18 @@ class DiseasesResource(Resource):
 	def get(self):
 		return fetch_diseases()
 
+#-- /api/v1/questchoice/<category>/<num_choices> returns questions of category , with num_choice choices
+class QuestChoiceResource(Resource):
+	def get(self,category,num_choices):
+		return fetch_questchoice(int(category),int(num_choices))
+		
+
 #-- Configuring api urls
 api.add_resource(QuestionsResource,'/api/v1/questions/<string:category>')
 api.add_resource(DiseasesResource,'/api/v1/diseases')
-
+api.add_resource(QuestChoiceResource,'/api/v1/questchoice/<string:category>/<string:num_choices>')
 	
+#-- Questions Model
 class Questions(db.Model):
   id              = db.Column(db.Integer,primary_key = True)
   clue_id         = db.Column(db.String(20))
@@ -68,6 +75,7 @@ class Questions(db.Model):
   def __repr__(self):
     return "<Question Clue : %s>"%(self.clue)
 
+#-- Diseases Model
 class Diseases(db.Model):
 	id = db.Column(db.Integer,primary_key = True)
 	disease_name  = db.Column(db.String(100))
@@ -76,7 +84,7 @@ class Diseases(db.Model):
 	def __repr__(self):
 		return "<Disease : %s>"%(self.disease_name)
 
-
+#-- Fetches questions of given category
 def fetch_questions(category = 0):
 	if category == 0:
 		results = Questions.query.order_by(func.rand()).limit(50).all()
@@ -91,13 +99,48 @@ def fetch_questions(category = 0):
 		quests.append(dict(question_id = result.id,clue_id = result.clue_id,clue_name = result.clue_name,success_rate = result.succes_rate,clue = result.clue,answer = result.answer,doid = result.doid,choice_list = rand_choices,correct_index = rand_choices.index(result.correct_id)))
 	return quests
 
-	
+#-- Fetches all diseases
 def fetch_diseases():
 	results  = Diseases.query.all()
 	diseases = []
 	for result in results:
 		diseases.append(dict(disease_id = result.id,disease_name = result.disease_name))
 	return diseases
+
+
+
+#-- Returns a random list of  n diseases,including the correct_disease index
+def fetch_choices(correct_choice,num_choice):
+	rand_list = []
+	while len(rand_list) != (num_choice-1) :
+		rand_num = random.randint(1,836)
+		if rand_num not in rand_list:
+			if rand_num != correct_choice:
+				rand_list.append(rand_num)
+	rand_list.append(correct_choice)
+	random.shuffle(rand_list)
+	#-- the location of correct ID
+	correct_id = rand_list.index(correct_choice)
+	rand_choices = []
+	for i in rand_list:
+		disease = Diseases.query.get(i)
+		rand_choices.append(dict(disease_id=disease.id,disease_name=disease.disease_name))
+	return (rand_choices,correct_id)
+	
+
+
+##-- Fetches questions of given category, along with "num_choices", returns a list of diseases , id of correct disease
+def fetch_questchoice(category=0,num_choices = 3):
+	if category == 0:
+		results = Questions.query.order_by(func.rand()).limit(50).all()
+	else:
+		results = Questions.query.filter(Questions.categories.like("%" + str(category) + "%")).order_by(func.rand()).limit(50).all()
+	
+	quests = []
+	for result in results:
+		choice_list,correct_id = fetch_choices(result.correct_id + 1,num_choices)
+		quests.append(dict(question_id = result.id,clue_id = result.clue_id,clue_name = result.clue_name,success_rate = result.succes_rate,clue = result.clue,answer = result.answer,doid = result.doid,choices_collection = choice_list,correct_index = correct_id))
+	return quests
 
 
 
@@ -156,4 +199,4 @@ def mtest(category=0):
 
 
 if __name__ == '__main__':
-	app.run()
+	app.run(debug=True)
