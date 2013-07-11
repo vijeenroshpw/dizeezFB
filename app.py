@@ -48,8 +48,14 @@ class Question(db.Model):
     return "<Question : %s>"%(self.text)
 
   def json_view(self):
+    # This gets the relationship of all the child choices
+    print self.choices
     return {  'id'          : self.id,
-              'text'        : self.text }
+              'text'        : self.text,
+              # However, it fails b/c it's not JSON Serializable. Please make this work using the 
+              # simpliest, most re-usable way imaginable. Question.choices must be an array of choice
+              # items
+              'choices'     : self.choices }
 
 class Choice(db.Model):
   '''
