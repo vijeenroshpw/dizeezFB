@@ -25,41 +25,44 @@ api = Api(app)
 #
 # M O D E L S
 #
-class Questions(db.Model):
-  id              = db.Column(db.Integer,primary_key = True)
-  clue_id         = db.Column(db.String(20))
-  clue_name       = db.Column(db.String(20))
-  succes_rate     = db.Column(db.Integer)
-  clue            = db.Column(db.String(50))
-  answer          = db.Column(db.String(50))
-  doid            = db.Column(db.String(15))
-  wrong_diseases  = db.Column(db.String(50))
-  correct_id      = db.Column(db.Integer)
-  categories      = db.Column(db.String(50))
+class Question(db.Model):
+  '''
+    So this will be the model which repersents a question. A question is simply a string of text
+    that can have a doid, it have many categories, and it can have many choices. 1 of the choices
+    should be flagged as correct
+  '''
+  id              = db.Column(db.Integer, primary_key = True)
+  text            = db.Column(db.String())
+  created     = db.Column(db.DateTime)
 
-  def __init__(self, clue_id,clue_name,success_rate,clue,answer,doid,wrong_diseases,correct_id,categories):
-    self.clue_id = clue_id
-    self.clue_name = clue_name
-    self.success_rate = success_rate
-    self.clue = clue
-    self.answer = answer
-    self.doid = doid
-    self.wrong_diseases = wrong_diseases
-    self.correct_id = correct_id
-    self.categories = categories
+  categories       = db.relationship('Category', backref=db.backref('question',  lazy='select'))
+  choices       = db.relationship('Choice', backref=db.backref('question',  lazy='select'))
 
   def __repr__(self):
-    return "<Question Clue : %s>"%(self.clue)
+    return "<Question : %s>"%(self.text)
 
-class Diseases(db.Model):
+class Choice(db.Model):
+  '''
+    A choice is a potential answer to a question. A question can have unlimited choices. A question
+    must have at least 1 choice that is flagged as correct
+  '''
   id            = db.Column(db.Integer,primary_key = True)
-  disease_name  = db.Column(db.String(100))
+  text          = db.Column(db.String())
+  created     = db.Column(db.DateTime)
 
-  def __init__(self,disease_name):
+  def __init__(self, disease_name):
     self.disease_name = disease_name
 
   def __repr__(self):
-    return "<Disease : %s>"%(self.disease_name)
+    return "<Disease : %s>"%(self.text)
+
+class Category(db.Model):
+  id    = db.Column(db.Integer, primary_key = True)
+  text  = db.Column(db.String())
+  created     = db.Column(db.DateTime)
+
+  def __repr__(self):
+    return "<Category : %s>"%(self.text)
 
 #
 # A P I
