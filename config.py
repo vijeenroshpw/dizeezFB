@@ -1,6 +1,6 @@
 USERNAME='root'
-PASSWORD=''
-DBNAME = 'dizeez'
+PASSWORD='root'
+DBNAME = 'dizeezalchemy1'
 DBHOST = 'localhost'
 
 ###### Connection URI ######

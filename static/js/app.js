@@ -12,13 +12,13 @@ QuestModel = Backbone.RelationalModel.extend({
            clue          : "",
            answer        : "",
            doid          : "",
-           choice_list   : [],
+	   choices       : [],	
            correct_index : 0
         },
 
 	relations: [{
 		type: Backbone.HasMany,
-		key: 'choices_collection',
+		key: 'choices',
 		relatedModel: 'Diseases',
 		collectionType: 'DiseasesCollection',
 		reverseRelation: {

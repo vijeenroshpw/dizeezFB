@@ -25,7 +25,7 @@ api = Api(app)
 #
 # M O D E L S
 #
-class Question(db.Model):
+class Questions(db.Model):
   id              = db.Column(db.Integer,primary_key = True)
   clue_id         = db.Column(db.String(20))
   clue_name       = db.Column(db.String(20))
@@ -51,7 +51,7 @@ class Question(db.Model):
   def __repr__(self):
     return "<Question Clue : %s>"%(self.clue)
 
-class Disease(db.Model):
+class Diseases(db.Model):
   id            = db.Column(db.Integer,primary_key = True)
   disease_name  = db.Column(db.String(100))
 
@@ -144,7 +144,7 @@ def fetch_questchoice(category=0,num_choices = 3):
   quests = []
   for result in results:
     choice_list,correct_id = fetch_choices(result.correct_id + 1,num_choices)
-    quests.append(dict(question_id = result.id,clue_id = result.clue_id,clue_name = result.clue_name,success_rate = result.succes_rate,clue = result.clue,answer = result.answer,doid = result.doid,choices_collection = choice_list,correct_index = correct_id))
+    quests.append(dict(question_id = result.id,clue_id = result.clue_id,clue_name = result.clue_name,success_rate = result.succes_rate,clue = result.clue,answer = result.answer,doid = result.doid,choices = choice_list,correct_index = correct_id))
   return quests
 
 @app.route('/',methods=['GET','POST'])
@@ -173,7 +173,7 @@ def game():
 
       try:
         #stuff = graph.get_object("https://graph.facebook.com/me/picture",redirect=False)
-              stuff = urllib.urlopen("https://graph.facebook.com/me/picture?redirect=false&access_token="+sr_data['oauth_token'])
+        stuff = urllib.urlopen("https://graph.facebook.com/me/picture?redirect=false&access_token="+sr_data['oauth_token'])
           
         print stuff.read()
       except:
