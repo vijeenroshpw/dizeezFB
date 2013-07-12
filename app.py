@@ -70,6 +70,9 @@ class Choice(db.Model):
 
   def __init__(self, disease_name,question_id ,correct = 0 ):
     self.text = disease_name
+    # @V Why might this be a bad idea or something that prevents the extexibility of using choices?
+    # Could a choice be the correct choice for more than 1 question? How do we prevent 2 identical choices 
+    # from appearing in the DB more than once whose only difference is the Choice.correct Bool
     self.correct = correct
     self.question_id = question_id
 
@@ -96,6 +99,8 @@ class Questions(Resource):
   '''
   def get(self):
     questions = Question.query.all()
+    # @V I put this in here for a reason, the way you replaced it with is 
+    # incorrect and a security issue: http://flask.pocoo.org/docs/security/#json-security
     return [i.json_view() for i in questions]
     #return jsonify(objects=[i.json_view() for i in questions])
 
