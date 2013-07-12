@@ -44,6 +44,9 @@ class Question(db.Model):
   categories  = db.relationship('Category', backref=db.backref('question',  lazy='select'))
   choices     = db.relationship('Choice', backref=db.backref('question',  lazy='select'))
 
+  def __init__(self,text):
+	self.text = text
+
   def __repr__(self):
     return "<Question : %s>"%(self.text)
 
@@ -52,10 +55,7 @@ class Question(db.Model):
     print self.choices
     return {  'id'          : self.id,
               'text'        : self.text,
-              # However, it fails b/c it's not JSON Serializable. Please make this work using the 
-              # simpliest, most re-usable way imaginable. Question.choices must be an array of choice
-              # items
-              'choices'     : self.choices }
+              'choices'     : [ dict(text=c.text,correct = c.correct,question_id = c.question_id) for c in self.choices ] }
 
 class Choice(db.Model):
   '''
@@ -65,11 +65,13 @@ class Choice(db.Model):
   id            = db.Column(db.Integer, primary_key = True)
   text          = db.Column(db.String(240))
   created       = db.Column(db.DateTime)
-
+  correct       = db.Column(db.Integer)
   question_id   = db.Column(db.Integer, db.ForeignKey('question.id'))
 
-  def __init__(self, disease_name):
-    self.disease_name = disease_name
+  def __init__(self, disease_name,question_id ,correct = 0 ):
+    self.text = disease_name
+    self.correct = correct
+    self.question_id = question_id
 
   def __repr__(self):
     return "<Choice : %s>"%(self.text)
@@ -94,7 +96,8 @@ class Questions(Resource):
   '''
   def get(self):
     questions = Question.query.all()
-    return jsonify(objects=[i.json_view() for i in questions])
+    return [i.json_view() for i in questions]
+    #return jsonify(objects=[i.json_view() for i in questions])
 
 #-- Config API urls
 api.add_resource(Questions, '/api/v1/questions')

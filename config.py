@@ -1,6 +1,6 @@
 USERNAME='root'
-PASSWORD=''
-DBNAME = 'dizeez'
+PASSWORD='root'
+DBNAME = 'Dizeez'
 DBHOST = 'localhost'
 
 ###### Connection URI ######
