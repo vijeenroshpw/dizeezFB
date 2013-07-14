@@ -37,6 +37,9 @@ class QCAssociation(db.Model):
   question_id = db.Column(db.Integer,db.ForeignKey('question.id'))
   choice_id = db.Column(db.Integer,db.ForeignKey('choice.id'))
   choice = db.relationship("Choice")
+
+  def __repr__(self):
+    return "<Assoc q_id %d : c_id %d>"%(self.question_id, self.choice_id)
  
 # Category Question Association
 class QCATAssociation(db.Model):
@@ -44,7 +47,9 @@ class QCATAssociation(db.Model):
   category_id = db.Column(db.Integer,db.ForeignKey('category.id'))
   question_id = db.Column(db.Integer,db.ForeignKey('question.id'))
   question = db.relationship("Question")
- 
+  
+  def __repr__(self):
+    return "<Accoc cat_id %d : q_id %d >"%(self.category_id, self.question_id)  
 # Question model
 class Question(db.Model):
   id          = db.Column(db.Integer, primary_key = True)
@@ -60,7 +65,22 @@ class Question(db.Model):
  
   def __repr__(self):
     return "<Question : %s>"%(self.text)
+  
+  def json_view(self):
+    return {  'id': self.id,
+              'text': self.text,
+              'choices': self.get_choice_list() }
  
+  def get_choice_list(self):
+    choice_list = []
+    correct = 0
+    for i in self.choices:
+      choice = i.choice
+      if self.correct_choice_id == choice.id :
+        correct = 1
+      choice_list.append(dict(choice_id = choice.id, text = choice.text,correct = correct))
+      correct = 0
+    return choice_list
  
  
 class Choice(db.Model):
@@ -146,6 +166,11 @@ def game():
     return render_template('game.html')
   else:
     return render_template('game.html')
+
+@app.route('/play',methods=['GET','POST'])
+def play():
+  return render_template('test.html')
+
 
 #
 # Main App Center
