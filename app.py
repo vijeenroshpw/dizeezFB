@@ -31,67 +31,66 @@ db = SQLAlchemy(app)
 #
 # M O D E L S
 #
+# Question Choice Association
+class QCAssociation(db.Model):
+  id = db.Column(db.Integer,primary_key = True)
+  question_id = db.Column(db.Integer,db.ForeignKey('question.id'))
+  choice_id = db.Column(db.Integer,db.ForeignKey('choice.id'))
+  choice = db.relationship("Choice")
+ 
+# Category Question Association
+class QCATAssociation(db.Model):
+  id = db.Column(db.Integer,primary_key = True)
+  category_id = db.Column(db.Integer,db.ForeignKey('category.id'))
+  question_id = db.Column(db.Integer,db.ForeignKey('question.id'))
+  question = db.relationship("Question")
+ 
+# Question model
 class Question(db.Model):
-  '''
-    So this will be the model which repersents a question. A question is simply a string of text
-    that can have a doid, it have many categories, and it can have many choices. 1 of the choices
-    should be flagged as correct
-  '''
   id          = db.Column(db.Integer, primary_key = True)
   text        = db.Column(db.String(240))
   created     = db.Column(db.DateTime)
-
-  categories  = db.relationship('Category', backref=db.backref('question',  lazy='select'))
-  choices     = db.relationship('Choice', backref=db.backref('question',  lazy='select'))
-
+  correct_choice_id = db.Column(db.Integer)
+        # choices point to QCAssociation objects, while each qca object point to a uniqe choice object (bijection)
+        # many to many relation ship via Association Model
+  choices     = db.relationship('QCAssociation')
+ 
   def __init__(self,text):
-	self.text = text
-
+    self.text = text
+ 
   def __repr__(self):
     return "<Question : %s>"%(self.text)
-
-  def json_view(self):
-    # This gets the relationship of all the child choices
-    print self.choices
-    return {  'id'          : self.id,
-              'text'        : self.text,
-              'choices'     : [ dict(text=c.text,correct = c.correct,question_id = c.question_id) for c in self.choices ] }
-
+ 
+ 
+ 
 class Choice(db.Model):
-  '''
-    A choice is a potential answer to a question. A question can have unlimited choices. A question
-    must have at least 1 choice that is flagged as correct
-  '''
   id            = db.Column(db.Integer, primary_key = True)
   text          = db.Column(db.String(240))
   created       = db.Column(db.DateTime)
-  correct       = db.Column(db.Integer)
-  question_id   = db.Column(db.Integer, db.ForeignKey('question.id'))
-
-  def __init__(self, disease_name,question_id ,correct = 0 ):
+ 
+  def __init__(self, disease_name ):
     self.text = disease_name
-    # @V Why might this be a bad idea or something that prevents the extexibility of using choices?
-    # Could a choice be the correct choice for more than 1 question? How do we prevent 2 identical choices 
-    # from appearing in the DB more than once whose only difference is the Choice.correct Bool
-    self.correct = correct
-    self.question_id = question_id
-
+ 
   def __repr__(self):
     return "<Choice : %s>"%(self.text)
-
+ 
 class Category(db.Model):
   id            = db.Column(db.Integer, primary_key = True)
   text          = db.Column(db.String(240))
   created       = db.Column(db.DateTime)
-
-  question_id   = db.Column(db.Integer, db.ForeignKey('question.id'))
-
+        #point to QCATAssociaton object, while each such object points to a uniqe question object      
+        #Many to Many relation on Category , Questions
+  questions     = db.relationship("QCATAssociation")
+ 
   def __repr__(self):
     return "<Category : %s>"%(self.text)
+ 
+ 
 
+# 
+#  A P I
 #
-# A P I
-#
+
 class Questions(Resource):
   '''
     GET: Returns list of questions
