@@ -10,30 +10,15 @@
 </head>
 
 <body>
-	 <script type="text/template" id="q-template">
-		 <from name='questions'>
-			<table class = 'table table-hover'> 
-				<thead>
-					<tr><th><%= clue_name %></th></tr>
-				</thead>
-				<tbody>
-					<tr><th id=option0> <input  type=radio value=0 name=answer class='opt' > <%= opt0 %> </th></tr>
-					<tr><th id=option1> <input  type=radio value=1 name=answer class='opt' > <%= opt1 %></th></tr>
-					<tr><th id=option2> <input  type=radio value=2 name=answer class='opt' > <%= opt2 %> </th></tr>
-					<tr><th id=option3> <input  type=radio value=3 name=answer class='opt' > <%= opt3 %> </th></tr>
-					<tr><th id=option4> <input  type=radio value=4 name=answer class='opt' > <%= opt4 %> </th></tr>
-				</tbody>
-			</table>
-		</form> 
-        
-         </script>
          <script type=text/template id=choice-template>
-           <input type=radio class=choice name='choice' value=<%= correct %> > <%= text %> <br/>
+           <input type=radio class=choice name='choice' value=<%= correct %>  onclick="DIZEEZ_FB.displayNextQuestion()"> <%= text %> <br/>
          </script>
+         
          <script type=text/template id=question-template>
 	   <p> <%= text %> </p>
          </script>
-	<script type="text/javascript" src="/static/js/lib/underscore-min.js"></script>
+	
+        <script type="text/javascript" src="/static/js/lib/underscore-min.js"></script>
 	<script type="text/javascript"  src="/static/js/lib/jquery-min.js"></script>
 	<script type="text/javascript"  src="/static/js/lib/backbone-min.js"></script>
         <script type="text/javascript" src="/static/js/lib/backbone-relational.js"></script>				
@@ -70,125 +55,12 @@
 
                 <div id='question'>
 			<!-- Questions Goes here -->		
-		</div> -->
-                <div id='question-area'> </div>
+         	</div> -->
+                <div id='question-area' > </div>
                 <div id='choices-area'> </div>
 	</div>
 	
-	<script type=text/javascript >
-		
-		// Code here need to be moved to  app.js file 
-		
-                //
-                // M O D E L S
-                //
-		
-                //-- Question Model
-		var Question = Backbone.RelationalModel.extend({
-	          defaults : {
-        	    id : -1,
-		    text:"",
-                    choices:[]	
-	          },
-
-	          relations: [{
-		    type: Backbone.HasMany,
-		    key: 'choices',
-		    relatedModel: 'Choice',
-		    collectionType: 'ChoiceCollection',
-		    reverseRelation: {
-		      key: 'question',
-		      includeInJSON: 'id'
-			// 'relatedModel' is automatically set to 'Zoo'; the 'relationType' to 'HasOne'.
-		}
-	}]
-});
-	       //-- Choice Model
-               var Choice = Backbone.RelationalModel.extend({
-                 defaults: {
-			choice_id:-1,
-                        correct:0,
-                        text:""
-                 },
-              });
-	      
-	      
-               //
-               // C O L L E C T I O N S
-               //
-	      
-	      //-- Choice Collection
-              var ChoiceCollection = Backbone.Collection.extend({
-                model:Choice
-              });
-   
-              //-- Question Collection
-              var QuestionCollection = Backbone.Collection.extend({
-                model:Question,
-                url:"/api/v1/questions"
-              });
-
-	      //
-              // V I E W S
-              //
-  
-             //-- Choice view
-             var ChoiceView = Backbone.View.extend({
-		el:'#choices-area',
-		events : {
-                  'click .choice':'nextQuestion'
-                },
-                nextQuestion: function() {
-                  if(this.isTrue()) 
-                    alert('a score point awarded');
-                  //invoke the global next question invoker here
-                  DIZEEZ_FB.displayNextQuestion();
-                  console.log("Next Question Invoked");
-                },
-                isTrue:function() {
-                   var $answer = $('input[name="choice"]:checked');
-                   return (parseInt($answer.val()) == 0)?false:true;
-                },
-                render:function(model) {
-	          var compiledTemplate = _.template($('#choice-template').html(),model.toJSON());
-                  this.$el.append(compiledTemplate);
-                },
-              });
-         
-	      //-- Question View 
-              var QuestionView = Backbone.View.extend({
-	        el:'#question-area',
-                render:function(model) {
-		  //-- renders the question text
-                  compiledTemplate=_.template($('#question-template').html(),model.toJSON());
-		  this.$el.html(compiledTemplate);
-                  choice = new ChoiceView();
-                  //-- renders the choice
-		  for(i = 0;i<model.get('choices').length;i++)
-		    choice.render(model.get('choices').at(i));
-                }
-              });
- 	      
-              
-              var DIZEEZ_FB = {};
-                DIZEEZ_FB.quests = new QuestionCollection({});
-                DIZEEZ_FB.quests.fetch({async:false});            //-- replace with the callback 
-		DIZEEZ_FB.questview = new QuestionView();
-		DIZEEZ_FB.questNum = 0;
-                DIZEEZ_FB.displayNextQuestion = function() {
-                  
-                  //-- first clear previous question tag, choices
-                  $('#question-area').empty()
-                  $('#choices-area').empty()
-                  
-                  // fetch next question
-                  DIZEEZ_FB.questNum++;
-                  DIZEEZ_FB.questview.render(DIZEEZ_FB.quests.at(DIZEEZ_FB.questNum));  
-                }                  
-                DIZEEZ_FB.questview.render(DIZEEZ_FB.quests.at(DIZEEZ_FB.questNum));  
-
-	</script>
-
+       <script type=text/javascript src=/static/js/app.js> </script>
 
 </body>
 </html>

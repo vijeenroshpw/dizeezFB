@@ -59,6 +59,20 @@ var QuestionCollection = Backbone.Collection.extend({
 //-- Choice view
 var ChoiceView = Backbone.View.extend({
   el:'#choices-area',
+  events : {
+    'click .choice':'nextQuestion'
+  },
+  nextQuestion: function() {
+    if(this.isTrue()) 
+      alert('a score point awarded');
+      //invoke the global next question invoker here
+      DIZEEZ_FB.displayNextQuestion();
+      console.log("Next Question Invoked");
+  },
+  isTrue:function() {
+    var $answer = $('input[name="choice"]:checked');
+    return (parseInt($answer.val()) == 0)?false:true;
+  },
   render:function(model) {
     var compiledTemplate = _.template($('#choice-template').html(),model.toJSON());
     this.$el.append(compiledTemplate);
@@ -73,7 +87,7 @@ var QuestionView = Backbone.View.extend({
     compiledTemplate=_.template($('#question-template').html(),model.toJSON());
     this.$el.html(compiledTemplate);
     choice = new ChoiceView();
-    //-- renders the choices
+    //-- renders the choice
     for(i = 0;i<model.get('choices').length;i++)
       choice.render(model.get('choices').at(i));
   }
@@ -85,18 +99,8 @@ DIZEEZ_FB.quests = new QuestionCollection({});
 DIZEEZ_FB.quests.fetch({async:false});            //-- replace with the callback 
 DIZEEZ_FB.questview = new QuestionView();
 DIZEEZ_FB.questNum = 0;
-DIZEEZ_FB.inst_id = 0;
 DIZEEZ_FB.displayNextQuestion = function() {
   //-- first clear previous question tag, choices
-  var $answer = $('input[name="choice"]:checked');
-  if (parseInt($answer.val()) == 1){
-    alert('score awarded');
-    //--TODO update score here
-  }
-       
-  //-- TODO update log model here
-  //-- log will be a model , which will be updated after each question , finaly persisted to server at end of game 
- 
   $('#question-area').empty()
   $('#choices-area').empty()
                   

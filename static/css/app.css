@@ -63,3 +63,15 @@
 		margin-left:180px;
 		margin-top: 130px;
 	}
+        #question-area {
+                position:fixed;
+                border:solid black 2px;
+		width:500px;
+                top:150px;
+        }
+        #choices-area {
+                position:fixed;
+                border:solid green 2px;
+                width:500px;
+                top:190px;
+        }
