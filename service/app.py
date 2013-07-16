@@ -16,7 +16,9 @@ AUTH_URL = config.AUTH_URL
 APP_ID = config.APP_ID
 
 #-- Global app object
-app = Flask(__name__)
+app = Flask(__name__,
+            static_url_path = '',
+            static_folder = '../web-app')
 
 #-- Global restful api handle
 api = Api(app)

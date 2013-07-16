@@ -1,25 +1,19 @@
 //
+// C O L L E C T I O N S
+//
+var QuestionCollection = Backbone.Collection.extend({
+  model : Question,
+  url   : '/api/v1/question'
+});
+
+var ChoiceCollection = Backbone.Collection.extend({
+  model : Choice,
+  url   : '/api/v1/choice'
+});
+
+//
 // M O D E L S
 //
-
-//-- Question Model
-var Question = Backbone.RelationalModel.extend({
-  defaults : {
-    id    : -1,
-    text  :"",
-  },
-
-  relations: [{
-    type: Backbone.HasMany,
-    key: 'choices',
-    relatedModel: 'Choice',
-    collectionType: 'ChoiceCollection',
-    reverseRelation: {
-      key: 'question',
-      includeInJSON: 'id'
-    }
-  }]
-});
 
 //-- Choice Model
 var Choice = Backbone.RelationalModel.extend({
@@ -30,12 +24,23 @@ var Choice = Backbone.RelationalModel.extend({
   },
 });
 
-//
-// C O L L E C T I O N S
-//
-var QuestionCollection = Backbone.Collection.extend({
-  model : Question,
-  url   : '/api/v1/questions'
+//-- Question Model
+var Question = Backbone.RelationalModel.extend({
+  defaults : {
+    id    : -1,
+    text  : "",
+  },
+
+  relations: [{
+    type: Backbone.HasMany,
+    key: 'choices',
+    relatedModel: Choice,
+    collectionType: ChoiceCollection,
+    reverseRelation: {
+      key: 'parentQuestion',
+      includeInJSON: 'id'
+    }
+  }]
 });
 
 //
@@ -50,7 +55,7 @@ var ChoiceView = Backbone.View.extend({
   },
 });
 
-//-- Question View 
+//-- Question View
 var QuestionView = Backbone.View.extend({
   el : '#question-area',
   render : function(model) {
@@ -66,7 +71,7 @@ var QuestionView = Backbone.View.extend({
 
 var DIZEEZ_FB = {};
 DIZEEZ_FB.quests = new QuestionCollection({});
-DIZEEZ_FB.quests.fetch({async:false});            //-- replace with the callback 
+DIZEEZ_FB.quests.fetch({async:false});            //-- replace with the callback
 DIZEEZ_FB.questview = new QuestionView();
 DIZEEZ_FB.questNum = 0;
 DIZEEZ_FB.inst_id = 0;
