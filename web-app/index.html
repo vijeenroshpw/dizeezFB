@@ -8,10 +8,31 @@
   </head>
   <body>
     <div id="container"></div>
+    <div id='question-area'></div>          <!-- Question text displayed here -->
+    <div id='choices-area'></div>           <!-- Choices text displayed here  -->
+    
+    
+    
+    <!-- Choice Template -->
+    <script type=text/template id=choice-template>
+      <input type=radio class=choice name='choice' value=<%= correct %>  onclick="DIZEEZ_FB.displayNextQuestion()"> <%= text %> <br/>
+    </script>
+    
+    <!-- Question Template -->     
+    <script type=text/template id=question-template>
+      <p> <%= text %> </p>
+    </script>
+
+    
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.js"></script>
     <script type="text/javascript" src="/js/lib/underscore.js"></script>
     <script type="text/javascript" src="/js/lib/backbone.js"></script>
     <script type="text/javascript" src="/js/lib/backbone-relational.js"></script>
     <script type="text/javascript" src="/js/app.js"></script>
+    <script type="text/javascript" >
+    
+      DIZEEZ_FB.start();
+   
+    </script>
   </body>
 </html>
