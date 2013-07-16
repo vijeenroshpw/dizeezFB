@@ -18,7 +18,8 @@ APP_ID = config.APP_ID
 #-- Global app object
 app = Flask(__name__,
             static_url_path = '',
-            static_folder = '../web-app')
+            static_folder = '../web-app',
+            template_folder='../web-app' )
 
 #-- Global restful api handle
 api = Api(app)
@@ -129,9 +130,16 @@ class Questions(Resource):
 #-- Config API urls
 api.add_resource(Questions, '/api/v1/questions')
 
+
+
 #
 # Main App Center
 #
+
+#-- Routes 
+@app.route('/',methods=['GET','POST'])
+def index():
+  return render_template('index.html')
 
 # Create DB
 db.create_all()
