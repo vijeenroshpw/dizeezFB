@@ -1,13 +1,16 @@
-#question-area {
-  position:fixed;
-  border:solid black 2px;
-  width:500px;
-  top:150px;
+#content {
+  margin-top: 120px;
 }
 
-#choices-area {
-  position:fixed;
-  border:solid green 2px;
-  width:500px;
-  top:190px;
+#choices label.radio {
+  margin: 12px;
+}
+
+#choices label.radio:hover {
+  color: #000;
+}
+
+.game.list ol li:hover {
+  color: #000;
+  cursor: pointer;
 }

@@ -1,12 +1,13 @@
 //
-// M O D E L S
+//-- M O D E L S
 //
-
-//-- Question Model
 var Question = Backbone.RelationalModel.extend({
   defaults : {
     id    : -1,
-    text  : "",
+    text  : '',
+
+    //-- UI/Client side params
+    active : false
   },
 
   relations: [{
@@ -21,97 +22,128 @@ var Question = Backbone.RelationalModel.extend({
   }]
 });
 
-//-- Choice Model
 var Choice = Backbone.RelationalModel.extend({
   defaults: {
     choice_id : -1,
     correct   : 0,
-    text      : ""
+    text      : ''
   },
 });
 
 //
-// C O L L E C T I O N S
+//-- C O L L E C T I O N S
 //
 var ChoiceCollection = Backbone.Collection.extend({
-  model:Choice
+  model : Choice
 });
 
 var QuestionCollection = Backbone.Collection.extend({
-  model:Question,
-  url:"/api/v1/questions"
+  model : Question,
+  url   : '/api/v1/questions'
 });
 
 //
-// V I E W S
+//-- V I E W S
 //
-var ChoiceView = Backbone.View.extend({
-  el:'#choices-area',
-  render:function(model) {
-    var compiledTemplate = _.template($('#choice-template').html(),model.toJSON());
-    this.$el.append(compiledTemplate);
+var ChoiceView = Backbone.Marionette.ItemView.extend({
+  template : '#choice-template',
+  tagName   : 'label',
+  className : 'radio'
+});
+
+var ChoiceCollectionView = Backbone.Marionette.CollectionView.extend({
+  itemView  : ChoiceView
+});
+
+var QuestionItemView = Backbone.Marionette.Layout.extend({
+  template : '#question-item-template',
+  tagName : 'li',
+
+  events : {
+    'click' : function() { this.model.set('active', true) }
+  }
+
+});
+
+var QuestionCollectionView = Backbone.Marionette.CollectionView.extend({
+  itemView: QuestionItemView,
+
+  initialize : function() {
+    this.collection.bind('change:active', this.render, this);
+  }
+});
+
+var QuestionView = Backbone.Marionette.Layout.extend({
+  template : '#question-template',
+
+  regions : {
+    choices : '#choices'
   },
-});
 
-var QuestionView = Backbone.View.extend({
-  el:'#question-area',
-  render:function(model) {
-    //-- renders the question text
-    compiledTemplate=_.template($('#question-template').html(),model.toJSON());
-    this.$el.html(compiledTemplate);
-    choice = new ChoiceView();
-    //-- renders the choices
-    for(i = 0;i<model.get('choices').length;i++)
-      choice.render(model.get('choices').at(i));
-  }
-});
+  onRender : function() {
+    this.model.set('active', true);
+    this.choices.show( new ChoiceCollectionView({collection : this.model.get('choices')}) )
+  },
 
-var DIZEEZ_FB = {};
-DIZEEZ_FB.quests = new QuestionCollection({});
-DIZEEZ_FB.quests.fetch({async:false});            //-- replace with the callback 
-DIZEEZ_FB.questview = new QuestionView();
-DIZEEZ_FB.questNum = 0;
-DIZEEZ_FB.score = 0;
-DIZEEZ_FB.totalQuestions = DIZEEZ_FB.quests.length;
-DIZEEZ_FB.timerHandle = null;
-DIZEEZ_FB.responseTime = 0;                      //-- keeps track of lag between answering
-DIZEEZ_FB.timerFunction = function() {
-  DIZEEZ_FB.responseTime++;
-}
-
-DIZEEZ_FB.start = function() {
-  //-- initalize the timer ( for measuring the response time
-  DIZEEZ_FB.timerHandle = window.setInterval(DIZEEZ_FB.timerFunction,1000);
-
-  //-- display the first question
-  DIZEEZ_FB.questview.render(DIZEEZ_FB.quests.at(DIZEEZ_FB.questNum));
-
-}
-
-DIZEEZ_FB.displayNextQuestion = function() {
-
-  //-- Was the clicked answer true ?
-  var $answer = $('input[name="choice"]:checked');
-  if (parseInt($answer.val()) == 1){
-    alert('Correct !!! ,  Response Time = '+ DIZEEZ_FB.responseTime);
-    //--TODO update score here
+  onClose : function() {
+    this.model.set({'active' : false}, {silent : true});
   }
 
-  //-- TODO update log model here
-  //-- log will be a model , which will be updated after each question , finaly persisted to server at end of game 
+});
 
-  //-- Clear the previous question's text and choices 
-  $('#question-area').empty()
-  $('#choices-area').empty()
+var GameView = Backbone.Marionette.Layout.extend({
+  template : '#game-template',
 
-  // display next question  ramp up in case questions end TODO: ramp from a random question 
-  DIZEEZ_FB.questNum = (DIZEEZ_FB.questNum + 1) % DIZEEZ_FB.totalQuestions;
-  DIZEEZ_FB.questview.render(DIZEEZ_FB.quests.at(DIZEEZ_FB.questNum));  
+  regions : {
+    question  : '.game.question',
+    list      : '.game.list ol'
+  },
 
-  // reset response tim 
-  DIZEEZ_FB.responseTime = 0;
-}
+  initialize : function(options) {
+    this.collection.bind('change:active', this.swapQuestions, this);
+  },
 
-DIZEEZ_FB.end = function() {
-  console.log(" Log written succesfully \n");
-}
+  onRender : function() {
+    var self = this;
+    this.question.show( new QuestionView({model : this.collection.at(0)}) );
+    this.list.show( new QuestionCollectionView(this.options) );
+
+    Mousetrap.bind(['up', 'right'], function() { self.loop(1); });
+    Mousetrap.bind(['down', 'left'], function() { self.loop(-1); })
+  },
+
+  onClose : function() {
+    Mousetrap.unbind(['up', 'right', 'down', 'left']);
+  },
+
+  //-- Events
+  loop : function(dir) {
+    var index = this.collection.indexOf( this.collection.findWhere({active:true}) ) + dir,
+        index = (index < 0) ? this.collection.length-1 : index,
+        index = (index == this.collection.length) ? 0 : index;
+
+    this.swapQuestions(this.collection.at(index));
+  },
+
+  swapQuestions : function(changed_model) {
+    this.question.show( new QuestionView({model : changed_model}) );
+  }
+})
+
+//
+//-- A P P  I N I T
+//
+var App = new Backbone.Marionette.Application(),
+    questions = new QuestionCollection({});
+
+App.addRegions({
+  main : '#content'
+});
+
+App.addInitializer(function() {
+  questions.fetch({async : false});
+  //-- A "game" is defined by a collection of questions
+  App.main.show( new GameView({collection: questions}) );
+});
+
+App.start();

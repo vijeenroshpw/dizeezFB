@@ -3,32 +3,48 @@
   <head>
     <meta charset="UTF-8">
     <title>Dizeez</title>
-    <link rel="stylesheet" type="text/css" href="/css/bootstrap-min.css">
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/css/style.css">
   </head>
   <body>
-    <div id="container">
-      <div id="question-area"></div>
-      <div id="choices-area"></div>
-    </div>
+    <div id="content" class="container"></div>
+
+    <!-- Game Template -->
+    <script type="text/template" id="game-template">
+      <div class="row">
+        <div class="span7 game question"></div>
+        <div class="span5 game list"><ol></ol></div>
+      </div>
+    </script>
 
     <!-- Choice Template -->
     <script type="text/template" id="choice-template">
-      <input type="radio" class="choice" name="choice" value="<%= correct %>" onclick="DIZEEZ_FB.displayNextQuestion()"><%= text %><br/>
+      <input type="radio" name="optionsRadios" value="<%= correct %>">
+      <%= text %>
     </script>
 
     <!-- Question Template -->
     <script type="text/template" id="question-template">
-      <p><%= text %></p>
+      <p class="lead"><%= text %></p>
+      <div id="choices"></div>
+    </script>
+
+    <!-- Question Item Template -->
+    <script type="text/template" id="question-item-template">
+      <% if(active) { %>
+        <p><strong><%= text %></strong></p>
+      <% } else { %>
+        <p><%= text %></p>
+      <% } %>
     </script>
 
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.js"></script>
     <script type="text/javascript" src="/js/lib/underscore.js"></script>
     <script type="text/javascript" src="/js/lib/backbone.js"></script>
     <script type="text/javascript" src="/js/lib/backbone-relational.js"></script>
+    <script type="text/javascript" src="/js/lib/backbone.marionette.js"></script>
+    <script type="text/javascript" src="/js/lib/bootstrap.js"></script>
+    <script type="text/javascript" src="/js/lib/mousetrap.js"></script>
     <script type="text/javascript" src="/js/app.js"></script>
-    <script type="text/javascript">
-      DIZEEZ_FB.start();
-    </script>
   </body>
 </html>
