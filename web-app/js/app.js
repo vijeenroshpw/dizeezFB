@@ -113,12 +113,24 @@ var QuestionView = Backbone.Marionette.Layout.extend({
 
 });
 
+var ScoreView = Backbone.Marionette.ItemView.extend({
+  template : '#game-score-template',
+  templateHelpers : function() { return this.options },
+
+  initialize : function(options) {
+    //-- This collection is a list of Choices
+    this.collection.bind('change:active', this.render, this);
+    this.collection.bind('change:answered', this.render, this);
+  },
+});
+
 var GameView = Backbone.Marionette.Layout.extend({
   template : '#game-template',
 
   regions : {
     question  : '.game.question',
-    list      : '.game.list ol'
+    list      : '.game.list ol',
+    score     : '.game.score'
   },
 
   initialize : function(options) {
@@ -129,6 +141,7 @@ var GameView = Backbone.Marionette.Layout.extend({
     var self = this;
     this.question.show( new QuestionView({model : this.collection.at(0)}) );
     this.list.show( new QuestionCollectionView(this.options) );
+    this.score.show( new ScoreView({collection : new ChoiceCollection(_.flatten(_.map(self.collection.pluck('choices'), function(collection) { return collection.models }))) }) );
 
     Mousetrap.bind(['up', 'right'], function() { self.loop(1); });
     Mousetrap.bind(['down', 'left'], function() { self.loop(-1); })

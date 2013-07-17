@@ -14,6 +14,7 @@
       <div class="row">
         <div class="span6 game question"></div>
         <div class="span4 game list"><ol></ol></div>
+        <div class="span2 game score"></div>
       </div>
     </script>
 
@@ -38,6 +39,11 @@
           <%= text %>
         <% } %>
       </p>
+    </script>
+
+    <!-- Score Template -->
+    <script type="text/template" id="game-score-template">
+      <p class="lead"><%= collection.where({active : true, correct : 1}).length %></p>
     </script>
 
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.js"></script>
