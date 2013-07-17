@@ -143,8 +143,8 @@ var GameView = Backbone.Marionette.Layout.extend({
     this.list.show( new QuestionCollectionView(this.options) );
     this.score.show( new ScoreView({collection : new ChoiceCollection(_.flatten(_.map(self.collection.pluck('choices'), function(collection) { return collection.models }))) }) );
 
-    Mousetrap.bind(['up', 'right'], function() { self.loop(1); });
-    Mousetrap.bind(['down', 'left'], function() { self.loop(-1); })
+    Mousetrap.bind(['down', 'right'], function() { self.loop(1); });
+    Mousetrap.bind(['up', 'left'], function() { self.loop(-1); })
   },
 
   onClose : function() {
