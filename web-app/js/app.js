@@ -3,11 +3,11 @@
 //
 var Question = Backbone.RelationalModel.extend({
   defaults : {
-    id    : -1,
     text  : '',
 
     //-- UI/Client side params
-    active : false
+    active : false,
+    answered : false
   },
 
   relations: [{
@@ -24,9 +24,11 @@ var Question = Backbone.RelationalModel.extend({
 
 var Choice = Backbone.RelationalModel.extend({
   defaults: {
-    choice_id : -1,
     correct   : 0,
-    text      : ''
+    text      : '',
+
+    //-- UI/Client side params
+    active : false
   },
 });
 
@@ -34,7 +36,8 @@ var Choice = Backbone.RelationalModel.extend({
 //-- C O L L E C T I O N S
 //
 var ChoiceCollection = Backbone.Collection.extend({
-  model : Choice
+  model : Choice,
+  url   : '/api/v1/choices'
 });
 
 var QuestionCollection = Backbone.Collection.extend({
@@ -48,20 +51,38 @@ var QuestionCollection = Backbone.Collection.extend({
 var ChoiceView = Backbone.Marionette.ItemView.extend({
   template : '#choice-template',
   tagName   : 'label',
-  className : 'radio'
+  className : 'radio',
+
+  events : {
+    'change input' : 'changedAnswer'
+  },
+
+  //-- Events
+  changedAnswer : function() {
+    var old_answer = this.model.collection.findWhere({active:true});
+    if(old_answer) {
+      old_answer.set({'active' : false}, {silent : true});
+    }
+    this.model.get('parentQuestion').set('answered', true);
+    this.model.save({'active' : true});
+  }
 });
 
 var ChoiceCollectionView = Backbone.Marionette.CollectionView.extend({
-  itemView  : ChoiceView
+  itemView  : ChoiceView,
+
+  initialize : function(options) {
+    this.collection.bind('change:active', this.render, this)
+  }
 });
 
-var QuestionItemView = Backbone.Marionette.Layout.extend({
+var QuestionItemView = Backbone.Marionette.ItemView.extend({
   template : '#question-item-template',
   tagName : 'li',
 
   events : {
     'click' : function() { this.model.set('active', true) }
-  }
+  },
 
 });
 
@@ -70,6 +91,7 @@ var QuestionCollectionView = Backbone.Marionette.CollectionView.extend({
 
   initialize : function() {
     this.collection.bind('change:active', this.render, this);
+    this.collection.bind('change:answered', this.render, this);
   }
 });
 

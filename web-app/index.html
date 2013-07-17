@@ -12,15 +12,15 @@
     <!-- Game Template -->
     <script type="text/template" id="game-template">
       <div class="row">
-        <div class="span7 game question"></div>
-        <div class="span5 game list"><ol></ol></div>
+        <div class="span6 game question"></div>
+        <div class="span4 game list"><ol></ol></div>
       </div>
     </script>
 
     <!-- Choice Template -->
     <script type="text/template" id="choice-template">
-      <input type="radio" name="optionsRadios" value="<%= correct %>">
-      <%= text %>
+      <input type="radio" name="optionsRadios" value="<%= correct %>" <%= active ? 'checked' : '' %>>
+      <p class="<% if(active) { %> <%= correct ? 'text-success' : 'text-error' %> <% } %>"><%= text %></p>
     </script>
 
     <!-- Question Template -->
@@ -31,11 +31,13 @@
 
     <!-- Question Item Template -->
     <script type="text/template" id="question-item-template">
-      <% if(active) { %>
-        <p><strong><%= text %></strong></p>
-      <% } else { %>
-        <p><%= text %></p>
-      <% } %>
+      <p class="<%= answered ? 'text-info' : 'muted' %>">
+        <% if(active) { %>
+          <strong><%= text %></strong>
+        <% } else { %>
+          <%= text %>
+        <% } %>
+      </p>
     </script>
 
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.js"></script>
