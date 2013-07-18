@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify, url_for, redirect, render_template
+from flask import Flask, request, jsonify, url_for, redirect, render_template, session
 from flask.views import View
-
+from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.sql.expression import func
 from flask.ext.restful import reqparse, abort, Api, Resource
@@ -76,7 +76,8 @@ class Question(db.Model):
               'choices': self.get_choice_list() }
 
   def get_choice_list(self):
-    #V: Could you explain what goes on here, this function will start to get more complicated so lets prepare
+    #V: Could you explain what goes on here, this function will start to get more complicated so lets preparea
+    #-- Currently this method fetches 
     choice_list = []
     correct = 0
     for i in self.choices:
@@ -111,6 +112,45 @@ class Category(db.Model):
   def __repr__(self):
     return "<Category : %s>"%(self.text)
 
+
+class Game(db.Model):
+  id = db.Column(db.Integer,primary_key = True)
+  player_id = db.Column(db.String(30))
+  player_name = db.Column(db.String(50))
+  start_timestamp = db.Column(db.DateTime)
+  logs = db.relationship('Log', backref = 'parentGame')
+
+  def __init__(self,player_id = -1,player_name = "Anonymous"):
+    self.player_id = player_id
+    self.player_name = player_name
+    self.start_timestamp = datetime.now()
+   
+  def __repr__(self):
+    return "<game %d , Plaer %s>"%(self.id, self.player_name)
+
+
+
+class Log(db.Model):
+  id = db.Column(db.Integer,primary_key = True)
+  choice_id = db.Column(db.Integer)
+  choice_text = db.Column(db.String(100))
+  parent_question = db.Column(db.Integer)
+  correct = db.Column(db.Integer)
+  timestamp = db.Column(db.DateTime)
+  game_id = db.Column(db.Integer,db.ForeignKey('game.id'))
+
+  def __init__(self,choice_id = -1, choice_text = "foo", parent_question = -1, correct = 0, game_id = -1):
+    self.choice_id = choice_id
+    self.choice_text = choice_text
+    self.parent_question = parent_question
+    self.correct = correct
+    self.game_id = game_id
+    self.timestamp = datetime.now()
+ 
+  def __repr__(self):
+    return "<log_id %d, game_id %d , choice_id %d>"%(self.id,self.game_id,self.choice_id)
+
+  
 #
 #  A P I
 #
@@ -127,8 +167,20 @@ class Questions(Resource):
     return [i.json_view() for i in questions]
     #return jsonify(objects=[i.json_view() for i in questions])
 
+class Choices(Resource):
+  '''
+    POST: writes the log component 
+  '''
+  def post(self):
+    data =  json.loads(request.data)
+    log  = Log(data['choice_id'],data['text'],data['parentQuestion'],data['correct'],session['game_id'])
+    db.session.add(log)
+    db.session.commit()
+
+    
 #-- Config API urls
 api.add_resource(Questions, '/api/v1/questions')
+api.add_resource(Choices,'/api/v1/choices')
 
 
 
@@ -139,6 +191,15 @@ api.add_resource(Questions, '/api/v1/questions')
 #-- Routes 
 @app.route('/',methods=['GET','POST'])
 def index():
+  
+  #-- each game have a ID , a player id , player name,
+  #-- TODO player_id, player_name should be obtained from parsing the signed_request sent by facebook 
+
+  game = Game(1,"vijeen")
+  db.session.add(game)
+  db.session.commit()
+  session['game_id'] = game.id 
+
   return render_template('index.html')
 
 # Create DB
@@ -146,4 +207,5 @@ db.create_all()
 
 if __name__ == '__main__':
     app.debug = True
+    app.secret_key = " A big secret key "
     app.run()
