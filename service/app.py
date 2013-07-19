@@ -107,6 +107,7 @@ class Category(db.Model):
   created       = db.Column(db.DateTime)
         #point to QCATAssociaton object, while each such object points to a uniqe question object      
         #Many to Many relation on Category , Questions
+
   questions     = db.relationship("QCATAssociation")
 
   def __repr__(self):
@@ -118,11 +119,18 @@ class Game(db.Model):
   player_id = db.Column(db.String(30))
   player_name = db.Column(db.String(50))
   start_timestamp = db.Column(db.DateTime)
+  category = db.Column(db.Integer)
+  questions = db.Column(db.String(100))
+  num_questions = db.Column(db.Integer)
+
   logs = db.relationship('Log', backref = 'parentGame')
 
-  def __init__(self,player_id = -1,player_name = "Anonymous"):
+  def __init__(self,player_id = -1, player_name = "Anonymous", category=-1, questions="", num_question=-1):
     self.player_id = player_id
     self.player_name = player_name
+    self.category = category
+    self.questions = questions
+    self.num_questions = num_question
     self.start_timestamp = datetime.now()
    
   def __repr__(self):
@@ -161,11 +169,22 @@ class Questions(Resource):
 
   '''
   def get(self):
-    questions = Question.query.all()
-    # @V I put this in here for a reason, the way you replaced it with is 
-    # incorrect and a security issue: http://flask.pocoo.org/docs/security/#json-security
-    return [i.json_view() for i in questions]
-    #return jsonify(objects=[i.json_view() for i in questions])
+    
+    if  session.get('game_id'):              
+      category = Category.query.get(session['category'])
+      questions = [ qcassoc.question for qcassoc in category.questions ]
+      random.shuffle(questions)
+      questions = questions[0:session['num_question']]
+      
+      #-- update the questions field of the game
+      game = Game.query.get(session['game_id'])
+      game.questions = repr([ q.id for q in questions ])    #-- a simple eval() will result in list revoked
+      db.session.commit() 
+      
+      return [ i.json_view() for i in questions ]
+    else:
+      questions = Question.query.all()
+      return [i.json_view() for i in questions]
 
 class Choices(Resource):
   '''
@@ -195,10 +214,23 @@ def index():
   #-- each game have a ID , a player id , player name,
   #-- TODO player_id, player_name should be obtained from parsing the signed_request sent by facebook 
 
-  game = Game(1,"vijeen")
+  #number of categories
+  num_category = len(Category.query.all())
+  
+  #select a category at random
+  category = random.randint(1,num_category)
+  
+  #number of questions in that category,currently all questions in that category is selected 
+  num_question = len(Category.query.get(category).questions)
+
+  game = Game(1,"vijeen",category,"",num_question)
   db.session.add(game)
   db.session.commit()
+  
+  #populate session so that api can make use of them
   session['game_id'] = game.id 
+  session['category'] = category
+  session['num_question'] = num_question
 
   return render_template('index.html')
 
