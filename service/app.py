@@ -122,17 +122,21 @@ class Game(db.Model):
   category = db.Column(db.Integer)
   questions = db.Column(db.String(100))
   num_questions = db.Column(db.Integer)
-
+  user_agent = db.Column(db.String(150))
+  player_ip = db.Column(db.String(30))
+  
   logs = db.relationship('Log', backref = 'parentGame')
 
-  def __init__(self,player_id = -1, player_name = "Anonymous", category=-1, questions="", num_question=-1):
+  def __init__(self,player_id = -1, player_name = "Anonymous", category=-1, questions="", num_question=-1,ua="",pip=""):
     self.player_id = player_id
     self.player_name = player_name
     self.category = category
     self.questions = questions
     self.num_questions = num_question
     self.start_timestamp = datetime.now()
-   
+    self.user_agent = ua
+    self.player_ip = pip
+
   def __repr__(self):
     return "<game %d , Plaer %s>"%(self.id, self.player_name)
 
@@ -210,7 +214,7 @@ api.add_resource(Choices,'/api/v1/choices')
 #-- Routes 
 @app.route('/',methods=['GET','POST'])
 def index():
-  
+  print request.environ 
   #-- each game have a ID , a player id , player name,
   #-- TODO player_id, player_name should be obtained from parsing the signed_request sent by facebook 
 
@@ -223,7 +227,7 @@ def index():
   #number of questions in that category,currently all questions in that category is selected 
   num_question = len(Category.query.get(category).questions)
 
-  game = Game(1,"vijeen",category,"",num_question)
+  game = Game(1,"vijeen",category,"",num_question,request.environ['HTTP_USER_AGENT'],request.environ['REMOTE_ADDR'])
   db.session.add(game)
   db.session.commit()
   
