@@ -4,7 +4,7 @@ from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.sql.expression import func
 from flask.ext.restful import reqparse, abort, Api, Resource
-
+import base64,hashlib
 import json, facebook, config, random, sys, urllib
 
 #
@@ -114,6 +114,25 @@ class Category(db.Model):
     return "<Category : %s>"%(self.text)
 
 
+class User(db.Model):
+  id          = db.Column(db.Integer,primary_key = True)
+  name        = db.Column(db.String(100))
+  api_key     = db.Column(db.Text)
+  
+  def __init__(self,name = "",api_key = ""):
+    self.name = name
+    self.api_key = api_key
+  
+  def __repr__(self):
+    return "<%s>"%(self.name)
+
+  def json_view(self):
+    return { 'id'     :self.id,
+             'name'   :self.name,
+             'api_key':self.api_key }
+
+    
+
 class Game(db.Model):
   id = db.Column(db.Integer,primary_key = True)
   player_id = db.Column(db.String(30))
@@ -201,9 +220,42 @@ class Choices(Resource):
     db.session.commit()
 
     
+user_parser = reqparse.RequestParser()
+user_parser.add_argument('name',type=str,location='json')
+user_parser.add_argument('api_key',type=str, location='cookies')
+
+class Users(Resource):
+  def get(self,**kwargs):
+    args = user_parser.parse_args()
+    user = db.session.query(User).filter_by(api_key = args['api_key']).first()
+    if not user:
+      return {'error','no_user'},200
+    else:
+      return user.json_view(),200
+
+  def put(self, **kwargs):
+    args = user_parser.parse_args()
+    user = db.Session.query(User).filter_by(api_key = args['api_key']).first()
+    if not user:
+      return {'error':'no user'},200
+    else:
+      user.name = args['name']
+      db.session.commit()
+      return user.json_view(),200
+  
+  def post(self, **kwargs):
+    args = user_parser.parse_args()
+    user = User(args['name'],
+                base64.b64encode(hashlib.sha256( str(random.getrandbits(256)) ).digest(), random.choice(['rA','aZ','gQ','hH','hG','aR','DD'])).rstrip('==') ) 
+    db.session.add(user)
+    db.session.commit()
+    return user.json_view(),201
+
+
 #-- Config API urls
 api.add_resource(Questions, '/api/v1/questions')
 api.add_resource(Choices,'/api/v1/choices')
+api.add_resource(Users,'/api/v1/user')
 
 
 

@@ -32,6 +32,33 @@ var Choice = Backbone.RelationalModel.extend({
   },
 });
 
+
+var User = Backbone.Model.extend({
+  url:'/api/v1/user',
+  defaults: {
+    'name'    : "",
+    'api_key' : ""
+  },
+  
+  initialize: function() {
+    if(this.isNew()) {
+      this.bind('change:api_key',this.changeAPIKey);
+    }
+    if(this.authenticated()){
+      this.set('api_key',$.cookie('api_key'));
+      this.fetch();
+    } else {
+      this.save();
+    }
+  },
+
+  authenticated: function() {
+    return Boolean($.cookie('api_key'));
+  },
+  changeAPIKey: function() {
+    $.cookie('api_key',this.get('api_key'));
+  }
+});
 //
 //-- C O L L E C T I O N S
 //
@@ -169,8 +196,8 @@ var GameView = Backbone.Marionette.Layout.extend({
 //-- A P P  I N I T
 //
 var App = new Backbone.Marionette.Application(),
-    questions = new QuestionCollection({});
-
+    questions = new QuestionCollection({}),
+    gameview = null;
 App.addRegions({
   main : '#content'
 });
@@ -178,7 +205,8 @@ App.addRegions({
 App.addInitializer(function() {
   questions.fetch({async : false});
   //-- A "game" is defined by a collection of questions
-  App.main.show( new GameView({collection: questions}) );
+  gameview = new GameView({collection:questions});
+  App.main.show( gameview  );
 });
 
 App.start();
