@@ -209,4 +209,7 @@ App.addInitializer(function() {
   App.main.show( gameview  );
 });
 
+//-- how to make sure App.start() execute only after this  :
+//-- user  = new User({'name':'anonymous'});
+
 App.start();

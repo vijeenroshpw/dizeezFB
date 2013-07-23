@@ -185,6 +185,8 @@ class Log(db.Model):
 #
 #  A P I
 #
+quest_parser = reqparse.RequestParser()
+quest_parser.add_argument('api_key',type=str,location='cookies')
 
 class Questions(Resource):
   '''
@@ -192,22 +194,30 @@ class Questions(Resource):
 
   '''
   def get(self):
-    
-    if  session.get('game_id'):              
-      category = Category.query.get(session['category'])
-      questions = [ qcassoc.question for qcassoc in category.questions ]
-      random.shuffle(questions)
-      questions = questions[0:session['num_question']]
-      
-      #-- update the questions field of the game
-      game = Game.query.get(session['game_id'])
-      game.questions = repr([ q.id for q in questions ])    #-- a simple eval() will result in list revoked
-      db.session.commit() 
-      
-      return [ i.json_view() for i in questions ]
+    args = quest_parser.parse_args()
+    user = db.session.query(User).filter_by(api_key=args['api_key']).first()
+    if not user:
+      return {'error':'not authenticated'},200
     else:
-      questions = Question.query.all()
-      return [i.json_view() for i in questions]
+      env =  request.environ
+      category_count = len(Category.query.all())     #-- number of categories
+      category = random.randint(1,category_count)    #-- selects a category at random
+      question_count = len(Category.query.get(category).questions)  #-- number of questions belonging to that category
+      category_instance = Category.query.get(category)  #-- selects category instance
+      questions = [qcassoc.question for qcassoc in category_instance.questions ]      #-- set of question instances
+      random.shuffle(questions)              #-- shuffles the questions inplace
+      
+      game = Game(user.id,user.name,category,"",question_count,env['HTTP_USER_AGENT'],env['REMOTE_ADDR'])
+      game.questions = repr([ q.id for q in questions ])
+      db.session.add(game)
+      db.session.commit()
+
+     
+      #populate session with needed informations
+      session['game_id'] = game.id
+      
+     
+      return [i.json_view() for i in questions ]
 
 class Choices(Resource):
   '''
@@ -229,7 +239,7 @@ class Users(Resource):
     args = user_parser.parse_args()
     user = db.session.query(User).filter_by(api_key = args['api_key']).first()
     if not user:
-      return {'error','no_user'},200
+      return {'error':'no_user'},200
     else:
       return user.json_view(),200
 
@@ -264,31 +274,7 @@ api.add_resource(Users,'/api/v1/user')
 #
 
 #-- Routes 
-@app.route('/',methods=['GET','POST'])
-def index():
-  print request.environ 
-  #-- each game have a ID , a player id , player name,
-  #-- TODO player_id, player_name should be obtained from parsing the signed_request sent by facebook 
-
-  #number of categories
-  num_category = len(Category.query.all())
-  
-  #select a category at random
-  category = random.randint(1,num_category)
-  
-  #number of questions in that category,currently all questions in that category is selected 
-  num_question = len(Category.query.get(category).questions)
-
-  game = Game(1,"vijeen",category,"",num_question,request.environ['HTTP_USER_AGENT'],request.environ['REMOTE_ADDR'])
-  db.session.add(game)
-  db.session.commit()
-  
-  #populate session so that api can make use of them
-  session['game_id'] = game.id 
-  session['category'] = category
-  session['num_question'] = num_question
-
-  return render_template('index.html')
+#-- No routes are added currently 
 
 # Create DB
 db.create_all()
