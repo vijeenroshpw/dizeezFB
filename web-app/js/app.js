@@ -46,9 +46,9 @@ var User = Backbone.Model.extend({
     }
     if(this.authenticated()){
       this.set('api_key',$.cookie('api_key'));
-      this.fetch();
+      this.fetch({'success':start});
     } else {
-      this.save();
+      this.save({},{'success':start});
     }
   },
 
@@ -197,16 +197,22 @@ var GameView = Backbone.Marionette.Layout.extend({
 //
 var App = new Backbone.Marionette.Application(),
     questions = new QuestionCollection({}),
-    gameview = null;
+    gameview = null,
+    start = null;
+
 App.addRegions({
   main : '#content'
 });
 
 App.addInitializer(function() {
-  questions.fetch({async : false});
-  //-- A "game" is defined by a collection of questions
-  gameview = new GameView({collection:questions});
-  App.main.show( gameview  );
+    start = function() {
+    //user = new User({'name':'anonymous'});
+    questions.fetch({async : false});
+    //-- A "game" is defined by a collection of questions
+    gameview = new GameView({collection:questions});
+    App.main.show( gameview  );
+  }
+  user = new User();
 });
 
 //-- how to make sure App.start() execute only after this  :
