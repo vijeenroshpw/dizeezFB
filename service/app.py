@@ -116,18 +116,20 @@ class Category(db.Model):
 
 class User(db.Model):
   id          = db.Column(db.Integer,primary_key = True)
+  fb_id       = db.Column(db.String(100))
   name        = db.Column(db.String(100))
   api_key     = db.Column(db.Text)
   
-  def __init__(self,name = "",api_key = ""):
+  def __init__(self,name = "",api_key = "",fb_id = ""):
     self.name = name
     self.api_key = api_key
-  
+    self.fb_id = fb_id
+
   def __repr__(self):
     return "<%s>"%(self.name)
 
   def json_view(self):
-    return { 'id'     :self.id,
+    return { 'id'     :self.fb_id,
              'name'   :self.name,
              'api_key':self.api_key }
 
@@ -233,7 +235,7 @@ class Choices(Resource):
 user_parser = reqparse.RequestParser()
 user_parser.add_argument('name',type=str,location='json')
 user_parser.add_argument('api_key',type=str, location='cookies')
-
+user_parser.add_argument('id',type=str,location='json')
 class Users(Resource):
   def get(self,**kwargs):
     args = user_parser.parse_args()
@@ -245,22 +247,16 @@ class Users(Resource):
 
   def put(self, **kwargs):
     args = user_parser.parse_args()
-    user = db.Session.query(User).filter_by(api_key = args['api_key']).first()
+    user = db.session.query(User).filter_by(fb_id = args['id']).first()
     if not user:
-      return {'error':'no user'},200
-    else:
-      user.name = args['name']
+      new_user = User(args['name'],
+                       base64.b64encode(hashlib.sha256( str(random.getrandbits(256)) ).digest(), random.choice(['rA','aZ','gQ','hH','hG','aR','DD'])).rstrip('=='),fb_id = args['id'])
+      print args['name'],args['id']      #-- debug
+      db.session.add(new_user)
       db.session.commit()
+      return new_user.json_view(),200
+    else:
       return user.json_view(),200
-  
-  def post(self, **kwargs):
-    args = user_parser.parse_args()
-    user = User(args['name'],
-                base64.b64encode(hashlib.sha256( str(random.getrandbits(256)) ).digest(), random.choice(['rA','aZ','gQ','hH','hG','aR','DD'])).rstrip('==') ) 
-    db.session.add(user)
-    db.session.commit()
-    return user.json_view(),201
-
 
 #-- Config API urls
 api.add_resource(Questions, '/api/v1/questions')

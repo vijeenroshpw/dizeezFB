@@ -36,19 +36,21 @@ var Choice = Backbone.RelationalModel.extend({
 var User = Backbone.Model.extend({
   url:'/api/v1/user',
   defaults: {
+    
     'name'    : "",
     'api_key' : ""
   },
   
   initialize: function() {
-    if(this.isNew()) {
-      this.bind('change:api_key',this.changeAPIKey);
-    }
+    
+    this.bind('change:api_key',this.changeAPIKey);
+    
     if(this.authenticated()){
       this.set('api_key',$.cookie('api_key'));
       this.fetch({'success':start});
     } else {
       this.save({},{'success':start});
+      
     }
   },
 
@@ -198,8 +200,10 @@ var GameView = Backbone.Marionette.Layout.extend({
 var App = new Backbone.Marionette.Application(),
     questions = new QuestionCollection({}),
     gameview = null,
-    start = null;
-
+    start = null,
+    fb_id = "",
+    user_name = "";
+    
 App.addRegions({
   main : '#content'
 });
@@ -212,10 +216,43 @@ App.addInitializer(function() {
     gameview = new GameView({collection:questions});
     App.main.show( gameview  );
   }
-  user = new User();
+  user = new User({'id':fb_id,'name':user_name});
 });
 
-//-- how to make sure App.start() execute only after this  :
-//-- user  = new User({'name':'anonymous'});
+//-- Javascript Facebook 
+//-- For Authentication
 
-App.start();
+  window.fbAsyncInit = function() {
+    //--  init the FB JS SDK
+    FB.init({
+      appId      : '159866620823022',                      
+       
+      status     : true,                                 
+      xfbml      : true                                  
+    });
+      
+    //-- Facebook Login
+    FB.login(function(response) {
+      if (response.authResponse) {
+        console.log('Welcome!  Fetching your information.... ');
+        FB.api('/me', function(response) {
+         //console.log('Good to see you, ' + response.name + '.');
+         user_name = response.name;                        //sets the username
+         fb_id =  response.id;                             // sets FB ID
+         App.start();                                      // starts the app.
+        });
+      } else {
+        console.log('User cancelled login or did not fully authorize.');
+      }
+    });
+
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/all.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+
