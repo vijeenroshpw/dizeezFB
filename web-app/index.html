@@ -7,17 +7,24 @@
     <link rel="stylesheet" type="text/css" href="/css/style.css">
   </head>
   <body>
-    <div id="content" class="container"></div>
-
+    <div id='user-info'> </div>
+    <div id="content" class="container">
+      
+    </div>
+    
     <!-- Game Template -->
     <script type="text/template" id="game-template">
       <div class="row">
-        <div class="span6 game question"></div>
-        <div class="span4 game list"><ol></ol></div>
+        <div class="span4 game question"></div>
+        <div class="span2 game list"><ol></ol></div>
         <div class="span2 game score"></div>
       </div>
     </script>
-
+    <!-- User Template -->
+    <script type="text/template" id="user-template">
+      <center><img src="<%= profile_pic %>" ></center>
+      <p align="center"><%= name %></p>
+    </script>
     <!-- Choice Template -->
     <script type="text/template" id="choice-template">
       <input type="radio" name="optionsRadios" value="<%= correct %>" <%= active ? 'checked' : '' %>>

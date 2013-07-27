@@ -36,21 +36,16 @@ var Choice = Backbone.RelationalModel.extend({
 var User = Backbone.Model.extend({
   url:'/api/v1/user',
   defaults: {
-    
     'name'    : "",
     'api_key' : ""
   },
-  
   initialize: function() {
-    
     this.bind('change:api_key',this.changeAPIKey);
-    
     if(this.authenticated()){
       this.set('api_key',$.cookie('api_key'));
       this.fetch({'success':start});
     } else {
       this.save({},{'success':start});
-      
     }
   },
 
@@ -77,6 +72,15 @@ var QuestionCollection = Backbone.Collection.extend({
 //
 //-- V I E W S
 //
+
+var UserView = Backbone.View.extend({
+  template:$('#user-template').html(),
+  el:'#user-info',
+  render:function() {
+    compiledTemplate = _.template(this.template,this.model.toJSON());
+    this.$el.html(compiledTemplate);
+  }
+});
 var ChoiceView = Backbone.Marionette.ItemView.extend({
   template : '#choice-template',
   tagName   : 'label',
@@ -201,22 +205,32 @@ var App = new Backbone.Marionette.Application(),
     questions = new QuestionCollection({}),
     gameview = null,
     start = null,
+    user = null,
     fb_id = "",
-    user_name = "";
-    
+    user_name = "",
+    profile_pic = "",
+    user_view = null;
 App.addRegions({
   main : '#content'
 });
 
 App.addInitializer(function() {
     start = function() {
-    //user = new User({'name':'anonymous'});
     questions.fetch({async : false});
-    //-- A "game" is defined by a collection of questions
     gameview = new GameView({collection:questions});
     App.main.show( gameview  );
   }
   user = new User({'id':fb_id,'name':user_name});
+  //-- fetches and sets profile pic 
+  //-- any code that does the ui population relating to FB content will go here
+  FB.api('/me/picture',function(response) {
+          profile_pic = response.data.url;
+          user.set({'profile_pic':profile_pic});
+          user_view = new UserView({'model':user});
+          user_view.render(); 
+  }); 
+  
+
 });
 
 //-- Javascript Facebook 
@@ -225,21 +239,19 @@ App.addInitializer(function() {
   window.fbAsyncInit = function() {
     //--  init the FB JS SDK
     FB.init({
-      appId      : '159866620823022',                      
-       
-      status     : true,                                 
-      xfbml      : true                                  
+      appId      : '159866620823022',
+      status     : true,
+      xfbml      : true
     });
-      
     //-- Facebook Login
     FB.login(function(response) {
       if (response.authResponse) {
         console.log('Welcome!  Fetching your information.... ');
+        //-- Fetches user information
         FB.api('/me', function(response) {
-         //console.log('Good to see you, ' + response.name + '.');
-         user_name = response.name;                        //sets the username
-         fb_id =  response.id;                             // sets FB ID
-         App.start();                                      // starts the app.
+          user_name = response.name;                        //sets the username
+          fb_id =  response.id;                             // sets FB ID
+          App.start();
         });
       } else {
         console.log('User cancelled login or did not fully authorize.');

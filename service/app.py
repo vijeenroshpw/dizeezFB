@@ -270,6 +270,9 @@ api.add_resource(Users,'/api/v1/user')
 #
 
 #-- Routes 
+@app.route('/',methods=['GET','POST'])
+def index():
+  return render_template('index.html')
 #-- No routes are added currently 
 
 # Create DB

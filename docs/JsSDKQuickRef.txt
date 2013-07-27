@@ -1,0 +1,37 @@
+Javascript SDK
+----------------
+
+//Logging, authorizing API 
+
+a) Login with permissions 
+  
+   FB.login(function(response) { //deal with response },{scope:'comma seperated list of permissions'});
+
+
+
+
+//Scores API
+
+a) Getting a users Score 
+  
+   FB.api('/user_id_or_alias/scores',function(response) { //do the stuff here });
+
+b) Getting scores of all the users of app 
+
+   FB.api('/appid/scores',function(response) { // do the stuff here });
+
+c) Updating the score of a user 
+
+   Prerequisite : User must have granted premission  'publish_action'
+
+   FB.api('/user_id_or_alias/scores','post',{'score':new_score},function(response) { //response is boolean here. True == success ,else false});
+
+
+//Picture related API
+
+a) Fetching the Profile picture
+
+   FB.api('/user_id_or_alias/picture',function(response) { // response object contains profile pic url });
+
+
+
