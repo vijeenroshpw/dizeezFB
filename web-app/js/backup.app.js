@@ -206,8 +206,8 @@ var App = new Backbone.Marionette.Application(),
     gameview = null,
     start = null,
     user = null,
-    fb_id = "xxxxxxxxxx",
-    user_name = "Anonymous",
+    fb_id = "",
+    user_name = "",
     profile_pic = "",
     user_view = null;
 App.addRegions({
@@ -224,8 +224,7 @@ App.addInitializer(function() {
   //-- fetches and sets profile pic 
   //-- any code that does the ui population relating to FB content will go here
   FB.api('/me/picture',function(response) {
-          //profile_pic = response.data.url;
-          profile_pic = (response.data)?response.data.url:"/img/Anonymous.jpg";
+          profile_pic = response.data.url;
           user.set({'profile_pic':profile_pic});
           user_view = new UserView({'model':user});
           user_view.render(); 
@@ -244,8 +243,6 @@ App.addInitializer(function() {
       status     : true,
       xfbml      : true
     });
-    
-    $.cookie('api_key','');       //clears the cookie for gods sake of developer
     //-- Facebook Login
     FB.login(function(response) {
       if (response.authResponse) {
@@ -258,7 +255,6 @@ App.addInitializer(function() {
         });
       } else {
         console.log('User cancelled login or did not fully authorize.');
-        App.start();                   //starts the application here
       }
     });
 
