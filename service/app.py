@@ -24,6 +24,7 @@ app = Flask(__name__,
 #-- Global restful api handle
 api = Api(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.CONNECTION_URI
+app.secret_key = 'a big secret key'
 db = SQLAlchemy(app)
 
 #
@@ -209,7 +210,7 @@ class Questions(Resource):
       questions = [qcassoc.question for qcassoc in category_instance.questions ]      #-- set of question instances
       random.shuffle(questions)              #-- shuffles the questions inplace
       
-      game = Game(user.id,user.name,category,"",question_count,env['HTTP_USER_AGENT'],env['REMOTE_ADDR'])
+      game = Game(user.id,user.name,category,"",question_count,env.get('HTTP_USER_AGENT'),env.get('REMOTE_ADDR'))
       game.questions = repr([ q.id for q in questions ])
       db.session.add(game)
       db.session.commit()
@@ -276,9 +277,10 @@ def index():
 #-- No routes are added currently 
 
 # Create DB
+def create_db():
+  db.create_all()
 db.create_all()
 
 if __name__ == '__main__':
     app.debug = True
-    app.secret_key = " A big secret key "
     app.run()
