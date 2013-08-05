@@ -55,6 +55,13 @@ class QCATAssociation(db.Model):
   def __repr__(self):
     return "<Accoc cat_id %d : q_id %d >"%(self.category_id, self.question_id)  
 
+class GQAssociation(db.Model):
+  #Game Question Association 
+  id = db.Column(db.Integer,primary_key = True)
+  game_id = db.Column(db.Integer,db.ForeignKey('game.id'))
+  question_id = db.Column(db.Integer,db.ForeignKey('question.id'))
+  question = db.relationship("Question")
+
 class Question(db.Model):
   # Question model
   id          = db.Column(db.Integer, primary_key = True)
@@ -142,18 +149,19 @@ class Game(db.Model):
   player_name = db.Column(db.String(50))
   start_timestamp = db.Column(db.DateTime)
   category = db.Column(db.Integer)
-  questions = db.Column(db.String(100))
+  #questions = db.Column(db.String(100))
+  questions = db.relationship("GQAssociation")
   num_questions = db.Column(db.Integer)
   user_agent = db.Column(db.String(150))
   player_ip = db.Column(db.String(30))
   
   logs = db.relationship('Log', backref = 'parentGame')
 
-  def __init__(self,player_id = -1, player_name = "Anonymous", category=-1, questions="", num_question=-1,ua="",pip=""):
+  def __init__(self,player_id = -1, player_name = "Anonymous", category=-1, num_question=-1,ua="",pip=""):
     self.player_id = player_id
     self.player_name = player_name
     self.category = category
-    self.questions = questions
+    #self.questions = questions
     self.num_questions = num_question
     self.start_timestamp = datetime.now()
     self.user_agent = ua
@@ -210,12 +218,21 @@ class Questions(Resource):
       questions = [qcassoc.question for qcassoc in category_instance.questions ]      #-- set of question instances
       random.shuffle(questions)              #-- shuffles the questions inplace
       
-      game = Game(user.id,user.name,category,"",question_count,env.get('HTTP_USER_AGENT'),env.get('REMOTE_ADDR'))
-      game.questions = repr([ q.id for q in questions ])
+      game = Game(user.id,user.name,category,question_count,env.get('HTTP_USER_AGENT'),env.get('REMOTE_ADDR'))
+      
+      #game.questions = repr([ q.id for q in questions ])
       db.session.add(game)
       db.session.commit()
+      
+      # Now Populate GQAssociation table
+      for quest in questions :
+        gqassoc = GQAssociation()
+        gqassoc.game_id = game.id
+        gqassoc.question_id = quest.id
+        db.session.add(gqassoc)
 
-     
+      db.session.commit()     
+      
       #populate session with needed informations
       session['game_id'] = game.id
       
