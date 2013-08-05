@@ -210,6 +210,7 @@ var App = new Backbone.Marionette.Application(),
     user_name = "Anonymous",
     profile_pic = "",
     user_view = null;
+
 App.addRegions({
   main : '#content'
 });
@@ -225,50 +226,48 @@ App.addInitializer(function() {
   //-- any code that does the ui population relating to FB content will go here
   FB.api('/me/picture',function(response) {
           //profile_pic = response.data.url;
+          // -- Anonymous.jpg is NOT an anonymous user symbol, please find a better one
           profile_pic = (response.data)?response.data.url:"/img/Anonymous.jpg";
           user.set({'profile_pic':profile_pic});
           user_view = new UserView({'model':user});
-          user_view.render(); 
-  }); 
-  
-
+          user_view.render();
+  });
 });
 
-//-- Javascript Facebook 
+//-- Javascript Facebook
 //-- For Authentication
+window.fbAsyncInit = function() {
+  //--  init the FB JS SDK
+  FB.init({
+    appId      : '159866620823022',
+    status     : true,
+    xfbml      : true
+  });
 
-  window.fbAsyncInit = function() {
-    //--  init the FB JS SDK
-    FB.init({
-      appId      : '159866620823022',
-      status     : true,
-      xfbml      : true
-    });
-    
-    $.cookie('api_key','');       //clears the cookie for gods sake of developer
-    //-- Facebook Login
-    FB.login(function(response) {
-      if (response.authResponse) {
-        console.log('Welcome!  Fetching your information.... ');
-        //-- Fetches user information
-        FB.api('/me', function(response) {
-          user_name = response.name;                        //sets the username
-          fb_id =  response.id;                             // sets FB ID
-          App.start();
-        });
-      } else {
-        console.log('User cancelled login or did not fully authorize.');
-        App.start();                   //starts the application here
-      }
-    });
+  //-- Clears cookie
+  $.cookie('api_key','');
 
-  };
+  //-- Facebook Login
+  FB.login(function(response) {
+    if (response.authResponse) {
+      console.log('Welcome!  Fetching your information.... ');
+      //-- Fetches user information
+      FB.api('/me', function(response) {
+        user_name = response.name;                        //sets the username
+        fb_id =  response.id;                             // sets FB ID
+        App.start();
+      });
+    } else {
+      console.log('User cancelled login or did not fully authorize.');
+      App.start();                   //starts the application here
+    }
+  });
+};
 
-  (function(d, s, id){
-     var js, fjs = d.getElementsByTagName(s)[0];
-     if (d.getElementById(id)) {return;}
-     js = d.createElement(s); js.id = id;
-     js.src = "//connect.facebook.net/en_US/all.js";
-     fjs.parentNode.insertBefore(js, fjs);
-   }(document, 'script', 'facebook-jssdk'));
-
+(function(d, s, id){
+   var js, fjs = d.getElementsByTagName(s)[0];
+   if (d.getElementById(id)) {return;}
+   js = d.createElement(s); js.id = id;
+   js.src = "//connect.facebook.net/en_US/all.js";
+   fjs.parentNode.insertBefore(js, fjs);
+ }(document, 'script', 'facebook-jssdk'));
