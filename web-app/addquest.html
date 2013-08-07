@@ -1,0 +1,153 @@
+<html>
+  <head>
+    <title> Add Questions </title>
+      <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+      <link rel="stylesheet" type="text/css" href="/css/style.css">
+      <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+  </head>
+  <body>
+    <form>
+      <legend> Add Questions </legend>
+      <table class="table">
+        <tbody>
+          <tr>
+            <td>Question Text :</td>
+            <td> <input  type="text" name="qtext" id="qtext"  placeholder="Enter Question Text here"> </td>
+            <td> </td>
+          </tr>
+          <tr>
+            <td>Choices : </td>
+            <td id="choices">
+              <input type="text" id="choice1" name="choice1"  ><br/>
+              <!-- <p id="cinfo1" class="text-success"></p>  -->
+            </td>
+            <td>
+                <button type="button" class="btn btn-primary" onClick="appendChoice()" >Add a Choice</button>
+            </td>
+            
+          </tr>
+          <tr>
+            <td>Categories</td>
+            <td id="categories">
+              <input type="text"  id="cat1" name="cat1" ><br/> 
+              <!-- <p id='catinfo1' class='text-success'> </p> -->
+            </td>
+            <td>    
+               <button type="button" class="btn btn-primary" onClick="appendCategory()" >Add a Category</button>
+            </td>
+            
+          </tr>
+          <tr> 
+            <td> correct choice : </td>
+            <td> <input type="text" id="correctchoice"> </td>
+            <td> Choice Index(1-n) </td> 
+         <tr>
+           <td> <button type='button' class='btn btn-primary' onClick='sendSubmit()'>Submit</button> </td>
+         </tr>
+
+         </tbody>
+       </table>
+     </form>
+     <script type='text/javascript'>
+         
+         var numCategory = 1,
+           numChoice = 1;
+
+         function appendChoice() {     
+           if($('#choice' + numChoice).val() != "") { 
+             numChoice++;
+             choiceHtml = "<input type='text' id='choice"+numChoice+"' name='choice"+numChoice+"' ><br/>";
+             $('#choices').append(choiceHtml);
+             bindAuto(numChoice);
+           } else {
+            alert(" A choice cannot be empty ");
+           }
+         }
+
+         function appendCategory() {
+           if($('#cat' + numCategory).val() != "") {
+             numCategory++;
+             categoryHtml = "<input type='text' id='cat"+numCategory+"' name='cat"+numCategory+"'><br/>";
+             $('#categories').append(categoryHtml);
+             bindAuto1(numCategory); 
+           } else {
+             alert(" Category Cannot be Empty ");
+           }
+         }
+         
+         function sendSubmit() {
+          var cats = [],
+            choices = [],
+            quest_text = "",
+            correct_choice=0;
+            
+          //-- gets the categories
+          for(i = 1;i<=numCategory;i++) {
+            cats[i-1] = $('#cat' + i).val();
+          }
+          //-- gets the choices
+          for(i = 1;i<=numChoice;i++) {
+            choices[i-1] = $('#choice' + i).val();
+          }
+          //-- fetches question text 
+          quest_text = $('#qtext').val();
+          //-- fetches correct choice
+          correct_choice = $('#correctchoice').val()-1;
+          
+          newquest = new NewQuestion({'categories':cats,'choices':choices,'quest_text':quest_text,'correct_choice':correct_choice});
+          newquest.save();
+          
+        }
+
+     </script>
+      <script type="text/javascript" src="/js/lib/jquery-1.10.2.js"></script>
+      <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>    
+       
+      <script type="text/javascript" src="/js/lib/underscore.js"></script>
+      <script type="text/javascript" src="/js/lib/backbone.js"></script>
+      <script type='text/javascript'>
+      var NewQuestion = Backbone.Model.extend({
+        defaults:{
+          id:-1,
+          categories:[],
+          choices:[],
+          quest_text:"",
+          correct_choice:-1
+        },
+        url:'/newquestion'
+      });
+          
+      function bindAuto(num) {
+        $('#choice'+ num).autocomplete({ source:function(request,response) { 
+         var result = ""; 
+         $.ajax({ url:'/choices',
+                   type:'GET',
+                   data:{'choicestr':request.term},
+                   success:function(data) {
+                     console.log(JSON.stringify( data));
+                     response(eval("(" + data + ")"));
+                   }
+               });
+        }
+      });
+     }
+     function bindAuto1(num) {
+     $('#cat'+ num).autocomplete({ source:function(request,response) { 
+         var result = ""; 
+         $.ajax({ url:'/categories',
+                   type:'GET',
+                   data:{'catstr':request.term},
+                   success:function(data) {
+                     console.log(JSON.stringify( data));
+                     response(eval("(" + data + ")"));
+                   }
+               });
+        }
+      });
+    }
+     bindAuto(1);
+     bindAuto1(1);  
+    </script>
+
+    </body>
+</html>

@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.28, for debian-linux-gnu (i686)
 --
--- Host: localhost    Database: fbintegrated
+-- Host: localhost    Database: finalterm
 -- ------------------------------------------------------
 -- Server version	5.5.28-0ubuntu0.12.04.3
 
@@ -27,7 +27,7 @@ CREATE TABLE `category` (
   `text` varchar(240) DEFAULT NULL,
   `created` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -78,12 +78,11 @@ CREATE TABLE `game` (
   `player_name` varchar(50) DEFAULT NULL,
   `start_timestamp` datetime DEFAULT NULL,
   `category` int(11) DEFAULT NULL,
-  `questions` varchar(100) DEFAULT NULL,
   `num_questions` int(11) DEFAULT NULL,
   `user_agent` varchar(150) DEFAULT NULL,
   `player_ip` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -92,8 +91,37 @@ CREATE TABLE `game` (
 
 LOCK TABLES `game` WRITE;
 /*!40000 ALTER TABLE `game` DISABLE KEYS */;
-INSERT INTO `game` VALUES (1,'1','','2013-07-27 00:56:58',1,'[1L, 3L, 2L]',3,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(2,'2','','2013-07-27 01:15:10',2,'[3L, 2L]',2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(3,'2','','2013-07-27 01:18:08',2,'[3L, 2L]',2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(4,'2','','2013-07-27 01:18:13',2,'[3L, 2L]',2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(5,'2','','2013-07-27 01:18:16',2,'[2L, 3L]',2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(6,'2','','2013-07-27 01:19:58',1,'[2L, 3L, 1L]',3,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(7,'2','','2013-07-27 01:20:29',1,'[2L, 3L, 1L]',3,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(8,'2','','2013-07-27 01:20:30',2,'[3L, 2L]',2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(9,'2','','2013-07-27 01:25:10',2,'[2L, 3L]',2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(10,'3','Vijeenrosh Vijeen','2013-07-27 01:33:11',2,'[2L, 3L]',2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(11,'3','Vijeenrosh Vijeen','2013-07-27 01:34:05',2,'[2L, 3L]',2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(12,'3','Vijeenrosh Vijeen','2013-07-27 01:34:11',1,'[1L, 2L, 3L]',3,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(13,'3','Vijeenrosh Vijeen','2013-07-27 01:51:53',1,'[2L, 3L, 1L]',3,'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:11.0) Gecko/20100101 Firefox/11.0','127.0.0.1'),(14,'3','Vijeenrosh Vijeen','2013-07-27 19:15:06',2,'[2L, 3L]',2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1');
+INSERT INTO `game` VALUES (1,'6','Anonymous','2013-08-05 23:30:26',2,2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(2,'5','Humble Learner','2013-08-05 23:40:37',2,2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(3,'5','Humble Learner','2013-08-05 23:40:46',2,2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(4,'5','Humble Learner','2013-08-05 23:40:48',2,2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(5,'5','Humble Learner','2013-08-05 23:40:51',2,2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(6,'5','Humble Learner','2013-08-05 23:40:54',2,2,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1'),(7,'5','Humble Learner','2013-08-05 23:40:57',1,3,'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.56 Safari/537.17','127.0.0.1');
 /*!40000 ALTER TABLE `game` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `gq_association`
+--
+
+DROP TABLE IF EXISTS `gq_association`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `gq_association` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `game_id` int(11) DEFAULT NULL,
+  `question_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `game_id` (`game_id`),
+  KEY `question_id` (`question_id`),
+  CONSTRAINT `gq_association_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `game` (`id`),
+  CONSTRAINT `gq_association_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `question` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `gq_association`
+--
+
+LOCK TABLES `gq_association` WRITE;
+/*!40000 ALTER TABLE `gq_association` DISABLE KEYS */;
+INSERT INTO `gq_association` VALUES (1,1,3),(2,1,2),(3,2,3),(4,2,2),(5,3,3),(6,3,2),(7,4,2),(8,4,3),(9,5,2),(10,5,3),(11,6,3),(12,6,2),(13,7,3),(14,7,2),(15,7,1);
+/*!40000 ALTER TABLE `gq_association` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -114,7 +142,7 @@ CREATE TABLE `log` (
   PRIMARY KEY (`id`),
   KEY `game_id` (`game_id`),
   CONSTRAINT `log_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `game` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -123,7 +151,7 @@ CREATE TABLE `log` (
 
 LOCK TABLES `log` WRITE;
 /*!40000 ALTER TABLE `log` DISABLE KEYS */;
-INSERT INTO `log` VALUES (1,1,' Choice 1',1,0,'2013-07-27 00:59:29',1),(2,2,' Choice 2',1,1,'2013-07-27 00:59:31',1),(3,3,' Choice 3',1,0,'2013-07-27 01:45:58',12),(4,2,' Choice 2',1,1,'2013-07-27 01:45:59',12),(5,1,' Choice 1',1,0,'2013-07-27 01:46:00',12),(6,3,' Choice 3',1,0,'2013-07-27 01:46:01',12),(7,4,' Choice 4',1,0,'2013-07-27 01:46:02',12),(8,3,' Choice 3',1,0,'2013-07-27 01:46:03',12),(9,2,' Choice 2',1,1,'2013-07-27 01:46:04',12),(10,1,' Choice 1',1,0,'2013-07-27 01:46:04',12),(11,4,' Choice 4',2,0,'2013-07-27 01:51:57',13),(12,5,' Choice 5',2,0,'2013-07-27 01:51:58',13),(13,3,' Choice 3',2,1,'2013-07-27 01:51:59',13);
+INSERT INTO `log` VALUES (1,3,' Choice 3',3,1,'2013-08-05 23:30:56',1),(2,4,' Choice 4',3,0,'2013-08-05 23:30:58',1),(3,4,' Choice 4',3,0,'2013-08-05 23:40:41',2);
 /*!40000 ALTER TABLE `log` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -224,7 +252,7 @@ CREATE TABLE `user` (
   `name` varchar(100) DEFAULT NULL,
   `api_key` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -233,7 +261,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (3,'100002023991153','Vijeenrosh Vijeen','zRecJYEntjV3WtCrGGjvuOJ2xPccHWZ4fTlOJurjWZM');
+INSERT INTO `user` VALUES (3,'100002023991153','Vijeenrosh Vijeen','zRecJYEntjV3WtCrGGjvuOJ2xPccHWZ4fTlOJurjWZM'),(4,'xxxxxxxxx','Anonymous','r5wEsfeHq8cGno9IY3cgD3nfuadGNj1EBk3oAhT5zZI'),(5,'100006459188737','Humble Learner','gpMDHosEgaR1pAuROyb9xkdSWZH3umklPBk6KRdr7mo'),(6,'xxxxxxxxxx','Anonymous','rHXohwdoYBbmV245lIuWRTbFaaa4noTrwGanmoRgJJ0'),(7,NULL,NULL,'XqO8On2ecFyMYTmWFmGrJlpYNG2UqnNrhOUdfV2Au1I'),(8,'xxx','xxx','AxyfblwcV9CYGMeIAgsQ5VO48wNr3TV6A3xkxQDonBE'),(9,'12345','testuser','0NrBbJf0fMdoRAXQTW5YCvBC7rVE2RGlq54cZzheDWA');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -246,4 +274,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-07-27 19:29:13
+-- Dump completed on 2013-08-05 23:46:48

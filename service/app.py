@@ -21,6 +21,7 @@ app = Flask(__name__,
             static_folder = '../web-app',
             template_folder='../web-app' )
 
+
 #-- Global restful api handle
 api = Api(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.CONNECTION_URI
@@ -31,12 +32,39 @@ db = SQLAlchemy(app)
 # U T I L S
 #
 
+def create_if_not_choice(choice_text=""):
+  ''' 
+      if this choice do exist ,return its id, else
+      create that choice and return its id
+  '''
+  choice = Choice.query.filter_by(text = choice_text).all()
+  if not choice:
+    c = Choice(choice_text)
+    db.session.add(c)
+    db.session.commit()
+    return c.id
+  else:
+    return choice[0].id
 
+def create_if_not_category(category_text = ""):
+  '''
+      if this categor do exist, return its id ,else
+      create it and return its id
+  '''
+  category = Category.query.filter_by(text = category_text).all()
+  if not category:
+    c = Category(category_text)
+    db.session.add(c)
+    db.session.commit()
+    return c.id
+  else:
+    return category[0].id
 #
 # M O D E L S
 #
+
 class QCAssociation(db.Model):
-  # Question Choice Association
+  #-- Question Choice Association
   id          = db.Column(db.Integer,primary_key = True)
   question_id = db.Column(db.Integer,db.ForeignKey('question.id'))
   choice_id   = db.Column(db.Integer,db.ForeignKey('choice.id'))
@@ -45,8 +73,9 @@ class QCAssociation(db.Model):
   def __repr__(self):
     return "<Assoc q_id %d : c_id %d>"%(self.question_id, self.choice_id)
 
+
 class QCATAssociation(db.Model):
-  # Category Question Association
+  #-- Category Question Association
   id          = db.Column(db.Integer,primary_key = True)
   category_id = db.Column(db.Integer,db.ForeignKey('category.id'))
   question_id = db.Column(db.Integer,db.ForeignKey('question.id'))
@@ -56,14 +85,14 @@ class QCATAssociation(db.Model):
     return "<Accoc cat_id %d : q_id %d >"%(self.category_id, self.question_id)  
 
 class GQAssociation(db.Model):
-  #Game Question Association 
+  #-- Game Question Association 
   id = db.Column(db.Integer,primary_key = True)
   game_id = db.Column(db.Integer,db.ForeignKey('game.id'))
   question_id = db.Column(db.Integer,db.ForeignKey('question.id'))
   question = db.relationship("Question")
 
 class Question(db.Model):
-  # Question model
+  #-- Question model
   id          = db.Column(db.Integer, primary_key = True)
   text        = db.Column(db.String(240))
   created     = db.Column(db.DateTime)
@@ -74,6 +103,7 @@ class Question(db.Model):
 
   def __init__(self,text):
     self.text = text
+    self.created = datetime.now()
 
   def __repr__(self):
     return "<Question : %s>"%(self.text)
@@ -96,6 +126,7 @@ class Question(db.Model):
                               text = choice.text, 
                               correct = correct))
       correct = 0
+    random.shuffle(choice_list)           #-- shuffles the choices , important
     return choice_list
 
 class Choice(db.Model):
@@ -105,6 +136,7 @@ class Choice(db.Model):
 
   def __init__(self, disease_name ):
     self.text = disease_name
+    self.created = datetime.now()
 
   def __repr__(self):
     return "<Choice : %s>"%(self.text)
@@ -117,6 +149,10 @@ class Category(db.Model):
         #Many to Many relation on Category , Questions
 
   questions     = db.relationship("QCATAssociation")
+  
+  def __init__(self,ctext):
+    self.text  = ctext
+    self.created = datetime.now()
 
   def __repr__(self):
     return "<Category : %s>"%(self.text)
@@ -149,7 +185,6 @@ class Game(db.Model):
   player_name = db.Column(db.String(50))
   start_timestamp = db.Column(db.DateTime)
   category = db.Column(db.Integer)
-  #questions = db.Column(db.String(100))
   questions = db.relationship("GQAssociation")
   num_questions = db.Column(db.Integer)
   user_agent = db.Column(db.String(150))
@@ -161,7 +196,6 @@ class Game(db.Model):
     self.player_id = player_id
     self.player_name = player_name
     self.category = category
-    #self.questions = questions
     self.num_questions = num_question
     self.start_timestamp = datetime.now()
     self.user_agent = ua
@@ -214,6 +248,10 @@ class Questions(Resource):
       category_count = len(Category.query.all())     #-- number of categories
       category = random.randint(1,category_count)    #-- selects a category at random
       question_count = len(Category.query.get(category).questions)  #-- number of questions belonging to that category
+
+      if question_count > 10:          # 10 is given for testing purpose
+        question_count = 10            # if its < 10 will not alter it.
+
       category_instance = Category.query.get(category)  #-- selects category instance
       questions = [qcassoc.question for qcassoc in category_instance.questions ]      #-- set of question instances
       random.shuffle(questions)              #-- shuffles the questions inplace
@@ -225,7 +263,7 @@ class Questions(Resource):
       db.session.commit()
       
       # Now Populate GQAssociation table
-      for quest in questions :
+      for quest in questions[0:question_count] :
         gqassoc = GQAssociation()
         gqassoc.game_id = game.id
         gqassoc.question_id = quest.id
@@ -237,7 +275,7 @@ class Questions(Resource):
       session['game_id'] = game.id
       
      
-      return [i.json_view() for i in questions ]
+      return [i.json_view() for i in questions[0:question_count] ]
 
 class Choices(Resource):
   '''
@@ -250,6 +288,52 @@ class Choices(Resource):
     db.session.commit()
 
     
+question_parser = reqparse.RequestParser()
+question_parser.add_argument('categories',type=str,location='json')
+question_parser.add_argument('choices',type=str,location='json')
+question_parser.add_argument('quest_text',type=str,location='json')
+question_parser.add_argument('correct_choice',type=int,location='json')
+
+#-- Adds a new question. Backend of /addquest
+
+class NewQuestion(Resource):
+  def put(self,**kwargs):
+    args = question_parser.parse_args()
+    choice_ids = []
+    category_ids = []
+    #-- gets the choice ids (non existent choice will be created)
+    for choice_text in eval(args['choices']):
+      print choice_text
+      choice_ids.append(create_if_not_choice(choice_text))
+    print choice_ids
+    #-- gets the cateogory ids (non existent category will be created)
+    for category_text in eval(args['categories']):
+      print category_text
+      category_ids.append(create_if_not_category(category_text))
+    print category_ids
+    q = Question(args['quest_text'])
+    q.correct_choice_id = choice_ids[args['correct_choice']]
+
+    db.session.add(q)
+    db.session.commit()
+    
+    for choice_id in choice_ids:
+      qc = QCAssociation()
+      qc.question_id = q.id
+      qc.choice_id = choice_id
+      db.session.add(qc)
+    db.session.commit()
+    
+    for category_id in category_ids:
+      qcat = QCATAssociation()
+      qcat.category_id = category_id
+      qcat.question_id = q.id
+      db.session.add(qcat)
+    db.session.commit()
+
+    return "OK",200
+
+
 user_parser = reqparse.RequestParser()
 user_parser.add_argument('name',type=str,location='json')
 user_parser.add_argument('api_key',type=str, location='cookies')
@@ -281,7 +365,7 @@ api.add_resource(Questions, '/api/v1/questions')
 api.add_resource(Choices,'/api/v1/choices')
 api.add_resource(Users,'/api/v1/user')
 
-
+api.add_resource(NewQuestion,'/newquestion')
 
 #
 # Main App Center
@@ -291,7 +375,29 @@ api.add_resource(Users,'/api/v1/user')
 @app.route('/',methods=['GET','POST'])
 def index():
   return render_template('index.html')
-#-- No routes are added currently 
+
+@app.route('/addquest',methods=['GET','POST'])
+def addquest():
+  return render_template('addquest.html')
+
+@app.route('/choices',methods=['GET'])
+def searchchoice():
+  choice_list = []
+  choices = Choice.query.filter(Choice.text.like(request.args['choicestr']+'%'))
+  for choice in choices:
+    choice_list.append(choice.text)
+  return json.dumps(choice_list)
+
+@app.route('/categories',methods=['GET','POST'])
+def searchcategory():
+  category_list = []
+  categories = Category.query.filter(Category.text.like(request.args['catstr']+ '%'))
+  for category in categories:
+    category_list.append(category.text)
+
+  return json.dumps(category_list)
+
+
 
 # Create DB
 def create_db():
