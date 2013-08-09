@@ -6,11 +6,14 @@ from sqlalchemy.sql.expression import func
 from flask.ext.restful import reqparse, abort, Api, Resource
 import base64,hashlib
 import json, facebook, config, random, sys, urllib
-
+from flask.ext.admin import Admin, BaseView, expose
+from flask.ext.admin.contrib.sqlamodel import ModelView
 #
 # A P P  C O N F I G
 #
+
 #-- Fetch necessary app parameters to global scope
+
 APP_SECRET = config.APP_SECRET
 AUTH_URL = config.AUTH_URL
 APP_ID = config.APP_ID
@@ -21,6 +24,8 @@ app = Flask(__name__,
             static_folder = '../web-app',
             template_folder='../web-app' )
 
+#-- Admin Handle
+admin = Admin(app)
 
 #-- Global restful api handle
 api = Api(app)
@@ -367,6 +372,25 @@ api.add_resource(Users,'/api/v1/user')
 
 api.add_resource(NewQuestion,'/newquestion')
 
+
+
+class AddQuestionView(BaseView):
+  @expose('/')
+  def index(self):
+    return self.render('addquest.html')
+
+
+  
+# Seems like Flask-Admin donot take care of Foreign Key stuffs
+# Still adding this views
+
+admin.add_view(ModelView(Question, db.session))
+admin.add_view(ModelView(Choice, db.session))
+admin.add_view(ModelView(Category, db.session))
+
+admin.add_view(AddQuestionView(name='Add Question'))
+
+
 #
 # Main App Center
 #
@@ -376,9 +400,7 @@ api.add_resource(NewQuestion,'/newquestion')
 def index():
   return render_template('index.html')
 
-@app.route('/addquest',methods=['GET','POST'])
-def addquest():
-  return render_template('addquest.html')
+
 
 @app.route('/choices',methods=['GET'])
 def searchchoice():
