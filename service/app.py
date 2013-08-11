@@ -8,6 +8,8 @@ import base64,hashlib
 import json, facebook, config, random, sys, urllib
 from flask.ext.admin import Admin, BaseView, expose
 from flask.ext.admin.contrib.sqlamodel import ModelView
+from flask.ext.admin.actions import action
+
 #
 # A P P  C O N F I G
 #
@@ -250,18 +252,21 @@ class Questions(Resource):
       return {'error':'not authenticated'},200
     else:
       env =  request.environ
-      category_count = len(Category.query.all())     #-- number of categories
-      category = random.randint(1,category_count)    #-- selects a category at random
-      question_count = len(Category.query.get(category).questions)  #-- number of questions belonging to that category
-
+      #category_count = len(Category.query.all())     #-- number of categories
+      #category = random.randint(1,category_count)    #-- selects a category at random
+      #question_count = len(Category.query.get(category).questions)  #-- number of questions belonging to that category
+      
+      category = random.choice(Category.query.all())   #-- choose a category at random
+      question_count = len(category.questions)
+      
       if question_count > 10:          # 10 is given for testing purpose
         question_count = 10            # if its < 10 will not alter it.
 
-      category_instance = Category.query.get(category)  #-- selects category instance
-      questions = [qcassoc.question for qcassoc in category_instance.questions ]      #-- set of question instances
+      #category_instance = Category.query.get(category)  #-- selects category instance
+      questions = [ qcassoc.question for qcassoc in category.questions ]      #-- set of question instances
       random.shuffle(questions)              #-- shuffles the questions inplace
       
-      game = Game(user.id,user.name,category,question_count,env.get('HTTP_USER_AGENT'),env.get('REMOTE_ADDR'))
+      game = Game(user.id,user.name,category.id,question_count,env.get('HTTP_USER_AGENT'),env.get('REMOTE_ADDR'))
       
       #game.questions = repr([ q.id for q in questions ])
       db.session.add(game)
@@ -369,7 +374,6 @@ class Users(Resource):
 api.add_resource(Questions, '/api/v1/questions')
 api.add_resource(Choices,'/api/v1/choices')
 api.add_resource(Users,'/api/v1/user')
-
 api.add_resource(NewQuestion,'/newquestion')
 
 
@@ -379,14 +383,49 @@ class AddQuestionView(BaseView):
   def index(self):
     return self.render('addquest.html')
 
+class QuestionAdmin(ModelView):
 
-  
-# Seems like Flask-Admin donot take care of Foreign Key stuffs
-# Still adding this views
+  column_list = ['text'] 
+  column_searchable_list = ['text']
 
-admin.add_view(ModelView(Question, db.session))
+
+  @action('remove', 'Remove', 'Are you sure you want to purge  selected models premenantly?')
+  def action_merge(self, ids):
+    for i in ids:
+      qcassocs = QCAssociation.query.filter_by(question_id = i)
+      for qcassoc in qcassocs:
+        db.session.delete(qcassoc)
+      db.session.commit()
+      qcatassocs = QCATAssociation.query.filter_by(question_id = i)
+      for qcatassoc in qcatassocs:
+        db.session.delete(qcatassoc)
+      db.session.commit()
+      question = Question.query.get(i)
+      db.session.delete(question)
+      db.session.commit()
+ 
+class CategoryAdmin(ModelView):
+
+ column_list = ['text'] 
+ column_searchable_list = ['text']
+
+
+ @action('remove', 'Remove', 'Are you sure you want to purge  selected models premenantly?')
+ def action_merge(self, ids):
+   for i in ids:
+     qcatassocs = QCATAssociation.query.filter_by(category_id = i)
+     for qcatassoc in qcatassocs:
+       db.session.delete(qcatassoc)
+     db.session.commit()
+     category = Category.query.get(i)
+     db.session.delete(category)
+     db.session.commit()
+
+     
+
+admin.add_view(QuestionAdmin(Question, db.session))
 admin.add_view(ModelView(Choice, db.session))
-admin.add_view(ModelView(Category, db.session))
+admin.add_view(CategoryAdmin(Category, db.session))
 
 admin.add_view(AddQuestionView(name='Add Question'))
 

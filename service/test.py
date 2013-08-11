@@ -16,8 +16,8 @@ class FlaskrTestCase(unittest.TestCase):
         self.test_client = app.app.test_client()
         app.create_db()
         quest = app.Question("Test Question")
-        category = app.Category()
-        category.text="Test Category"
+        category = app.Category("Test Category")
+        
         app.db.session.add(quest)
         app.db.session.add(category)
         app.db.session.commit()
