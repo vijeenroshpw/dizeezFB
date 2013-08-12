@@ -298,11 +298,31 @@ class Choices(Resource):
     db.session.commit()
 
     
+catquest_parser = reqparse.RequestParser()
+catquest_parser.add_argument('category',type=str,location='json')
+catquest_parser.add_argument('questions',type=str,location='json')
+
+class NewCategoryQuestion(Resource):
+  def put(self,**kwargs):
+    args = catquest_parser.parse_args()
+    catid = Category.query.filter_by(text=args['category']).all()[0].id
+    for quest in eval(args['questions']):
+      questions =  Question.query.filter_by(text=quest).all()
+      for q in questions:
+        qcat = QCATAssociation()
+        qcat.question_id = q.id
+        qcat.category_id = catid
+        db.session.add(qcat)
+      db.session.commit()
+
+          
+
 question_parser = reqparse.RequestParser()
 question_parser.add_argument('categories',type=str,location='json')
 question_parser.add_argument('choices',type=str,location='json')
 question_parser.add_argument('quest_text',type=str,location='json')
 question_parser.add_argument('correct_choice',type=int,location='json')
+
 
 #-- Adds a new question. Backend of /addquest
 
@@ -344,6 +364,7 @@ class NewQuestion(Resource):
     return "OK",200
 
 
+
 user_parser = reqparse.RequestParser()
 user_parser.add_argument('name',type=str,location='json')
 user_parser.add_argument('api_key',type=str, location='cookies')
@@ -375,7 +396,7 @@ api.add_resource(Questions, '/api/v1/questions')
 api.add_resource(Choices,'/api/v1/choices')
 api.add_resource(Users,'/api/v1/user')
 api.add_resource(NewQuestion,'/newquestion')
-
+api.add_resource(NewCategoryQuestion,'/newcategoryquestion')
 
 
 class AddQuestionView(BaseView):
@@ -458,6 +479,13 @@ def searchcategory():
 
   return json.dumps(category_list)
 
+@app.route('/questions',methods=['GET','POST'])
+def searchquestion():
+  question_list = []
+  questions = Question.query.filter(Question.text.like(request.args['qststr'] + '%'))
+  for question in questions:
+    question_list.append(question.text)
+  return json.dumps(question_list)
 
 
 # Create DB

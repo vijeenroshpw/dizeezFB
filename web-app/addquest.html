@@ -48,10 +48,26 @@
          </tbody>
        </table>
      </form>
+     <br/>
+     <form>
+       <legend> Add Question to Category </legend>
+         <table class="table" style="border:solid black 2px;width:600px;margin-left:300px;">
+           <tr>
+             <td> <input type="text" name="catq" id="catq"> </td>
+             <td id="questions"> <input type="text" name="qst1" id="qst1"> </td>
+             <td> <button type='button' class='btn btn-primary' onClick='appendQuestion()'>Add a question </button>
+           </tr>
+           <tr> 
+             <td> <button type="button"  onClick='sendSubmit1()' > Submit</button> </td>
+           </tr>
+ 
+        </table>
+      </form> 
      <script type='text/javascript'>
          
          var numCategory = 1,
-           numChoice = 1;
+           numChoice = 1,
+           numQuestion = 1;
 
          function appendChoice() {     
            if($('#choice' + numChoice).val() != "") { 
@@ -72,6 +88,17 @@
              bindAuto1(numCategory); 
            } else {
              alert(" Category Cannot be Empty ");
+           }
+         }
+         
+         function appendQuestion() {
+           if($("#qst"+numQuestion).val() != "") {
+             numQuestion++;
+             questionHtml = "<input type='text' id='qst"+numQuestion+"'name='qst"+numQuestion+"'><br/>";
+             $("#questions").append(questionHtml);
+             bindAuto2(numQuestion);
+           } else {
+             alert(" Question cannot be empty ");
            }
          }
          
@@ -98,6 +125,19 @@
           newquest.save();
           
         }
+     
+        function sendSubmit1() {
+          var questions = [],
+            category="";
+            for(i=1;i<=numQuestion;i++) {
+              questions[i-1]=$("#qst"  + i).val();
+            }
+            category=$("#catq").val();
+                      
+          var newcatquest = new NewCategoryQuest({'questions':questions,'category':category});
+          newcatquest.save();
+        }
+        
 
      </script>
       <script type="text/javascript" src="/js/lib/jquery-1.10.2.js"></script>
@@ -116,8 +156,17 @@
         },
         url:'/newquestion'
       });
-          
-      function bindAuto(num) {
+      
+      var NewCategoryQuest = Backbone.Model.extend({
+        defaults:{
+          id:-1,
+          category:"",
+          questions:[]
+        },
+        url:'/newcategoryquestion'
+     });    
+     
+     function bindAuto(num) {
         $('#choice'+ num).autocomplete({ source:function(request,response) { 
          var result = ""; 
          $.ajax({ url:'/choices',
@@ -145,8 +194,24 @@
         }
       });
     }
-     bindAuto(1);
-     bindAuto1(1);  
+    function bindAuto2(num) {
+     $('#qst'+ num).autocomplete({ source:function(request,response) { 
+         var result = ""; 
+         $.ajax({ url:'/questions',
+                   type:'GET',
+                   data:{'qststr':request.term},
+                   success:function(data) {
+                     console.log(JSON.stringify( data));
+                     response(eval("(" + data + ")"));
+                   }
+               });
+        }
+      });
+    }
+    bindAuto(1);
+    bindAuto1(1);  
+    bindAuto2(1);
+    bindAuto1("q");
     </script>
 
     </body>
