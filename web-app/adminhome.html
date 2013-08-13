@@ -1,0 +1,18 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+<table class='table' style='border:solid black 2px;width:200px;margin:200px auto'>
+  <tr> 
+    <td> Total Questions </td>
+    <td> {{ questions }} </td>
+  </tr>
+  <tr>
+    <td> Total Categories </td>
+    <td> {{ categories }} </td>
+  </tr>
+  <tr>
+    <td> Total Choice Entries </td>
+    <td> {{ choices }} </td>
+  </tr>
+</table>
+
+{% endblock %} 

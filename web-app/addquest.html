@@ -18,7 +18,8 @@
           <tr>
             <td>Choices : </td>
             <td id="choices">
-              <input type="text" id="choice1" name="choice1"  ><br/>
+              <input type="text" id="choice1" name="choice1">
+              <input type='radio' name='cchoice' value="1"><br/>
               <!-- <p id="cinfo1" class="text-success"></p>  -->
             </td>
             <td>
@@ -37,12 +38,15 @@
             </td>
             
           </tr>
-          <tr> 
+          <!--<tr> 
             <td> correct choice : </td>
             <td> <input type="text" id="correctchoice"> </td>
             <td> Choice Index(1-n) </td> 
+          </tr> -->
          <tr>
            <td> <button type='button' class='btn btn-primary' onClick='sendSubmit()'>Submit</button> </td>
+           <td> </td>
+           <td> </td>
          </tr>
 
          </tbody>
@@ -52,13 +56,21 @@
      <form>
        <legend> Add Question to Category </legend>
          <table class="table" style="border:solid black 2px;width:600px;margin-left:300px;">
+           <thead>
+             <tr>
+               <th> Category </th>
+               <th> Questions </th>
+               <th> </th>
+             </tr>
            <tr>
              <td> <input type="text" name="catq" id="catq"> </td>
              <td id="questions"> <input type="text" name="qst1" id="qst1"> </td>
-             <td> <button type='button' class='btn btn-primary' onClick='appendQuestion()'>Add a question </button>
+             <td> <button type='button' class='btn btn-primary' onClick='appendQuestion()'>Add a question </button></td>
+             <td> </td>
            </tr>
            <tr> 
              <td> <button type="button"  onClick='sendSubmit1()' > Submit</button> </td>
+             <td></td><td></td>
            </tr>
  
         </table>
@@ -72,7 +84,7 @@
          function appendChoice() {     
            if($('#choice' + numChoice).val() != "") { 
              numChoice++;
-             choiceHtml = "<input type='text' id='choice"+numChoice+"' name='choice"+numChoice+"' ><br/>";
+             choiceHtml = "<input type='text' id='choice"+numChoice+"' name='choice"+numChoice+"' > <input type='radio' name='cchoice' value='" + numChoice + "'><br/>";
              $('#choices').append(choiceHtml);
              bindAuto(numChoice);
            } else {
@@ -118,12 +130,18 @@
           }
           //-- fetches question text 
           quest_text = $('#qtext').val();
+          if(quest_text == "") {
+            alert("Question cannot be empty!!!");
+            return ;
+          }
+
           //-- fetches correct choice
-          correct_choice = $('#correctchoice').val()-1;
-          
+          //correct_choice = $('#correctchoice').val()-1;
+          correct_choice = $('input[name=cchoice]:checked').val() - 1;
           newquest = new NewQuestion({'categories':cats,'choices':choices,'quest_text':quest_text,'correct_choice':correct_choice});
           newquest.save();
-          
+          alert(" Question saved succesfully ");
+          location.reload();          
         }
      
         function sendSubmit1() {

@@ -7,6 +7,7 @@ from flask.ext.restful import reqparse, abort, Api, Resource
 import base64,hashlib
 import json, facebook, config, random, sys, urllib
 from flask.ext.admin import Admin, BaseView, expose
+from flask.ext import admin
 from flask.ext.admin.contrib.sqlamodel import ModelView
 from flask.ext.admin.actions import action
 
@@ -19,6 +20,7 @@ from flask.ext.admin.actions import action
 APP_SECRET = config.APP_SECRET
 AUTH_URL = config.AUTH_URL
 APP_ID = config.APP_ID
+ADMINPASS = config.ADMINPASS
 
 #-- Global app object
 app = Flask(__name__,
@@ -27,7 +29,34 @@ app = Flask(__name__,
             template_folder='../web-app' )
 
 #-- Admin Handle
-admin = Admin(app)
+class AdminHomeView(admin.AdminIndexView):
+ 
+  @expose('/',methods=['GET','POST'])
+  def index(self):
+    questions = len(Question.query.all())
+    categories = len(Category.query.all())
+    choices = len(Choice.query.all())
+    games = len(Game.query.all())
+
+    if request.method =='GET':
+      if not session.get('admin'):
+        return render_template('adminlogin.html')
+      else:
+        return self.render('adminhome.html', questions = questions,categories = categories,choices = choices,games=games)
+    else:
+      passphrase = request.form.get('passphrase')
+      print passphrase
+      if passphrase == ADMINPASS:
+        session['admin'] = True
+        #-- redirect to /admin/
+        print "Admin Redirect"
+        return redirect('/admin/')
+      else:
+        return render_template('adminlogin.html')
+
+      
+
+admin = Admin(app ,index_view = AdminHomeView())
 
 #-- Global restful api handle
 api = Api(app)
@@ -400,15 +429,26 @@ api.add_resource(NewCategoryQuestion,'/newcategoryquestion')
 
 
 class AddQuestionView(BaseView):
+  def is_accessible(self):
+    return session.get('admin')
+
   @expose('/')
   def index(self):
     return self.render('addquest.html')
+
+class LogoutView(BaseView):
+  @expose('/')
+  def logout(self):
+    session.pop('admin')
+    return redirect('/admin')
 
 class QuestionAdmin(ModelView):
 
   column_list = ['text'] 
   column_searchable_list = ['text']
 
+  def is_accessible(self):
+    return session.get('admin')
 
   @action('remove', 'Remove', 'Are you sure you want to purge  selected models premenantly?')
   def action_merge(self, ids):
@@ -430,6 +470,8 @@ class CategoryAdmin(ModelView):
  column_list = ['text'] 
  column_searchable_list = ['text']
 
+ def is_accessible(self):
+   return session.get('admin')
 
  @action('remove', 'Remove', 'Are you sure you want to purge  selected models premenantly?')
  def action_merge(self, ids):
@@ -447,9 +489,8 @@ class CategoryAdmin(ModelView):
 admin.add_view(QuestionAdmin(Question, db.session))
 admin.add_view(ModelView(Choice, db.session))
 admin.add_view(CategoryAdmin(Category, db.session))
-
 admin.add_view(AddQuestionView(name='Add Question'))
-
+admin.add_view(LogoutView(name="Logout"))
 
 #
 # Main App Center
