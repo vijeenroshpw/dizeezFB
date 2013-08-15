@@ -281,11 +281,8 @@ class Questions(Resource):
       return {'error':'not authenticated'},200
     else:
       env =  request.environ
-      #category_count = len(Category.query.all())     #-- number of categories
-      #category = random.randint(1,category_count)    #-- selects a category at random
-      #question_count = len(Category.query.get(category).questions)  #-- number of questions belonging to that category
-      
-      category = random.choice(Category.query.all())   #-- choose a category at random
+      #category = random.choice(Category.query.all())   #-- choose a category at random
+      category = Category.query.get(session['category'])
       question_count = len(category.questions)
       
       if question_count > 10:          # 10 is given for testing purpose
@@ -499,7 +496,9 @@ admin.add_view(LogoutView(name="Logout"))
 #-- Routes 
 @app.route('/',methods=['GET','POST'])
 def index():
-  return render_template('index.html')
+  categories = Category.query.all()
+  return render_template('index.html',categories = categories)    #-- For showing categories
+
 
 
 
@@ -528,7 +527,18 @@ def searchquestion():
     question_list.append(question.text)
   return json.dumps(question_list)
 
+@app.route('/setcategory',methods=['GET','POST'])
+def setcategory():
+  ''' Accepts a category id from GET paramter 'cat'
+      and set session variable category to that 
+      This is later used to select questions from that 
+      category  whilst a GET to /api/v1/questions
+  ''' 
+  print request.args.get('cat')        #-- Debugging
+  session['category'] = request.args.get('cat')
+  print session['category']
 
+  return "200"
 # Create DB
 def create_db():
   db.create_all()

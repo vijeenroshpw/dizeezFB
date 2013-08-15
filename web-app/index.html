@@ -8,6 +8,14 @@
   </head>
   <body>
     <div id='user-info'></div>
+    <div id='select-category' style='margin:30px auto;width:300px;'>
+      <select id='cselect'>
+        {% for category in categories %}
+          <option value='{{ category.id }}'> {{ category.text }} </option>
+        {% endfor %}
+      </select><br/>
+      <button onclick='selectCategory()'> Start </button> 
+    </div>
     <div id="content" class="container"></div>
 
     <!-- Game Template -->
@@ -20,7 +28,7 @@
     </script>
     <!-- User Template -->
     <script type="text/template" id="user-template">
-      <center><img src="<%= profile_pic %>" ></center>
+      <center><img src="<%= profile_pic %>" width='100px' height='100px'></center>
       <p align="center"><%= name %></p>
     </script>
     <!-- Choice Template -->

@@ -98,6 +98,8 @@ var ChoiceView = Backbone.Marionette.ItemView.extend({
     }
     this.model.get('parentQuestion').set('answered', true);
     this.model.save({'active' : true});
+    //-- A try
+    Mousetrap.trigger('down');
   }
 });
 
@@ -199,6 +201,18 @@ var GameView = Backbone.Marionette.Layout.extend({
 })
 
 //
+//-- U T I L S
+//
+
+function selectCategory() {
+  category = $('#cselect').val();
+  //App.start();
+   
+  $.get('/setcategory?cat='+category,function(data,status) { App.start();$('#select-category').hide(); });
+}
+
+
+//
 //-- A P P  I N I T
 //
 var App = new Backbone.Marionette.Application(),
@@ -255,11 +269,11 @@ window.fbAsyncInit = function() {
       FB.api('/me', function(response) {
         user_name = response.name;                        //sets the username
         fb_id =  response.id;                             // sets FB ID
-        App.start();
+        //App.start();
       });
     } else {
       console.log('User cancelled login or did not fully authorize.');
-      App.start();                   //starts the application here
+      //App.start();                   //starts the application here
     }
   });
 };
