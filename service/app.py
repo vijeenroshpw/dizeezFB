@@ -68,6 +68,28 @@ db = SQLAlchemy(app)
 # U T I L S
 #
 
+def get_questions(api_key='',method=1):
+  ''' Accepts api_key and a paramteter method. Method
+      determines the criteria by which the questions 
+      are generated.Currently only one method is de-
+      fined. "1 Random Question Selection" 
+  '''
+  #-- Selects 1000 questions at random
+  if method ==1:
+    questions = Question.query.order_by(func.random()).limit(100).all()
+    #questions = questions[1:100]
+    return (questions,1)
+  #-- Action corresponding to method 2
+  elif method == 2:
+    pass
+  #-- Action corresponding to method 3 etc,
+  
+  elif method == 3:
+    pass
+  
+  else:
+    pass
+
 def create_if_not_choice(choice_text=""):
   ''' 
       if this choice do exist ,return its id, else
@@ -147,6 +169,7 @@ class Question(db.Model):
   def json_view(self):
     return {  'id': self.id,
               'text': self.text,
+              'categories':[ c.category_id for c in QCATAssociation.query.filter_by(question_id=self.id).all() ],
               'choices': self.get_choice_list() }
 
   def get_choice_list(self):
@@ -281,18 +304,27 @@ class Questions(Resource):
       return {'error':'not authenticated'},200
     else:
       env =  request.environ
-      #category = random.choice(Category.query.all())   #-- choose a category at random
-      category = Category.query.get(session['category'])
-      question_count = len(category.questions)
+      #category_count = len(Category.query.all())     #-- number of categories
+      #category = random.randint(1,category_count)    #-- selects a category at random
+      #question_count = len(Category.query.get(category).questions)  #-- number of questions belonging to that category
       
-      if question_count > 10:          # 10 is given for testing purpose
-        question_count = 10            # if its < 10 will not alter it.
+      #category = random.choice(Category.query.all())   #-- choose a category at random
+      #question_count = len(category.questions)
+      
+      #Currently method 1 is used. Later a selection process can be implemented
+      questions,method = get_questions(args['api_key'],1)
+      question_count = len(questions)
+      #if question_count > 10:          # 10 is given for testing purpose
+      #  question_count = 10            # if its < 10 will not alter it.
 
       #category_instance = Category.query.get(category)  #-- selects category instance
-      questions = [ qcassoc.question for qcassoc in category.questions ]      #-- set of question instances
-      random.shuffle(questions)              #-- shuffles the questions inplace
+      #questions = [ qcassoc.question for qcassoc in category.questions ]      #-- set of question instances
+      #random.shuffle(questions)              #-- shuffles the questions inplace
       
-      game = Game(user.id,user.name,category.id,question_count,env.get('HTTP_USER_AGENT'),env.get('REMOTE_ADDR'))
+      #game = Game(user.id,user.name,category.id,question_count,env.get('HTTP_USER_AGENT'),env.get('REMOTE_ADDR'))
+      
+      game = Game(user.id,user.name,method,question_count,env.get('HTTP_USER_AGENT'),env.get('REMOTE_ADDR'))
+      
       
       #game.questions = repr([ q.id for q in questions ])
       db.session.add(game)
@@ -496,9 +528,7 @@ admin.add_view(LogoutView(name="Logout"))
 #-- Routes 
 @app.route('/',methods=['GET','POST'])
 def index():
-  categories = Category.query.all()
-  return render_template('index.html',categories = categories)    #-- For showing categories
-
+  return render_template('index.html',categories=Category.query.all())
 
 
 
@@ -527,18 +557,7 @@ def searchquestion():
     question_list.append(question.text)
   return json.dumps(question_list)
 
-@app.route('/setcategory',methods=['GET','POST'])
-def setcategory():
-  ''' Accepts a category id from GET paramter 'cat'
-      and set session variable category to that 
-      This is later used to select questions from that 
-      category  whilst a GET to /api/v1/questions
-  ''' 
-  print request.args.get('cat')        #-- Debugging
-  session['category'] = request.args.get('cat')
-  print session['category']
 
-  return "200"
 # Create DB
 def create_db():
   db.create_all()

@@ -4,7 +4,7 @@
 var Question = Backbone.RelationalModel.extend({
   defaults : {
     text  : '',
-
+    categories:[],
     //-- UI/Client side params
     active : false,
     answered : false
@@ -96,10 +96,9 @@ var ChoiceView = Backbone.Marionette.ItemView.extend({
     if(old_answer) {
       old_answer.set({'active' : false}, {silent : true});
     }
+    Mousetrap.trigger('down');
     this.model.get('parentQuestion').set('answered', true);
     this.model.save({'active' : true});
-    //-- A try
-    Mousetrap.trigger('down');
   }
 });
 
@@ -203,14 +202,10 @@ var GameView = Backbone.Marionette.Layout.extend({
 //
 //-- U T I L S
 //
-
 function selectCategory() {
-  category = $('#cselect').val();
-  //App.start();
+  App.start();
    
-  $.get('/setcategory?cat='+category,function(data,status) { App.start();$('#select-category').hide(); });
 }
-
 
 //
 //-- A P P  I N I T
@@ -232,7 +227,22 @@ App.addRegions({
 App.addInitializer(function() {
     start = function() {
     questions.fetch({async : false});
-    gameview = new GameView({collection:questions});
+    //Filter 1
+
+    //Filter 2
+
+    //Finaly applying user selected category
+    cat_id = parseInt($('#cselect').val());
+    $('#select-category').hide();
+    qc = new QuestionCollection();
+    quests = questions.filter(function(q) {
+      if( q.get('categories').indexOf(cat_id) != -1 ) {qc.add(q);return true;}
+      else return false;
+    });
+    //console.log(JSON.stringify(qc)); 
+    gameview = new GameView({collection:qc});
+    
+  
     App.main.show( gameview  );
   }
   user = new User({'id':fb_id,'name':user_name});
