@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Dizeez</title>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+  </head>
+  <body>
+    <div id='user-info'></div>
+    <div id='select-category' style='margin:30px auto;width:300px;'>
+      <select id='cselect'>
+        {% for l in levels %}
+          <option value='{{ l }}'> Level {{ l }} </option>
+        {% endfor %}
+      </select><br/>
+      <button onclick='selectCategory()'> Start </button> 
+    </div>
+    <div id="content" class="container"></div>
+
+    <!-- Game Template -->
+    <script type="text/template" id="game-template">
+      <div class="row">
+        <div class="span4 game question"></div>
+        <div class="span2 game list" style="overflow-y:scroll;height:200px;"><ol></ol></div>
+        <div class="span2 game score"></div>
+      </div>
+    </script>
+    <!-- User Template -->
+    <script type="text/template" id="user-template">
+      <center><img src="<%= profile_pic %>" width='100px' height='100px'></center>
+      <p align="center"><%= name %></p>
+    </script>
+    <!-- Choice Template -->
+    <script type="text/template" id="choice-template">
+      <input type="radio" name="optionsRadios" value="<%= correct %>" <%= active ? 'checked' : '' %>>
+      <p class="<% if(active) { %> <%= correct ? 'text-success' : 'text-error' %> <% } %>"><%= text %></p>
+    </script>
+
+    <!-- Question Template -->
+    <script type="text/template" id="question-template">
+      <p class="lead"><%= text %></p>
+      <div id="choices"></div>
+    </script>
+
+    <!-- Question Item Template -->
+    <script type="text/template" id="question-item-template">
+      <p class="<%= answered ? 'text-info' : 'muted' %>">
+        <% if(active) { %>
+          <strong><%= text %></strong>
+        <% } else { %>
+          <%= text %>
+        <% } %>
+      </p>
+    </script>
+
+    <!-- Score Template -->
+    <script type="text/template" id="game-score-template">
+      <p class="lead"><%= collection.where({active : true, correct : 1}).length %></p>
+    </script>
+
+    <script type="text/javascript" src="/js/lib/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/js/lib/jquery-cookie.js"></script>
+    <script type="text/javascript" src="/js/lib/underscore.js"></script>
+    <script type="text/javascript" src="/js/lib/backbone.js"></script>
+    <script type="text/javascript" src="/js/lib/backbone-relational.js"></script>
+    <script type="text/javascript" src="/js/lib/backbone.marionette.js"></script>
+    <script type="text/javascript" src="/js/lib/bootstrap.js"></script>
+    <script type="text/javascript" src="/js/lib/mousetrap.js"></script>
+    <script type="text/javascript" src="/js/app.js"></script>
+  </body>
+</html>

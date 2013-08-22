@@ -222,6 +222,7 @@ class User(db.Model):
   fb_id       = db.Column(db.String(100))
   name        = db.Column(db.String(100))
   api_key     = db.Column(db.Text)
+  level       = db.Column(db.Integer,default = 1)
   
   def __init__(self,name = "",api_key = "",fb_id = ""):
     self.name = name
@@ -234,7 +235,8 @@ class User(db.Model):
   def json_view(self):
     return { 'id'     :self.fb_id,
              'name'   :self.name,
-             'api_key':self.api_key }
+             'api_key':self.api_key,
+              'level':self.level }
 
     
 
@@ -423,6 +425,7 @@ class NewQuestion(Resource):
 
 
 
+
 user_parser = reqparse.RequestParser()
 user_parser.add_argument('name',type=str,location='json')
 user_parser.add_argument('api_key',type=str, location='cookies')
@@ -526,9 +529,10 @@ admin.add_view(LogoutView(name="Logout"))
 #
 
 #-- Routes 
-@app.route('/',methods=['GET','POST'])
+@app.route('/play',methods=['GET','POST'])
 def index():
-  return render_template('index.html',categories=Category.query.all())
+  level=int(request.cookies.get('level'))
+  return render_template('play.html',categories=Category.query.all(),levels=range(1,level+1))
 
 
 
@@ -557,6 +561,26 @@ def searchquestion():
     question_list.append(question.text)
   return json.dumps(question_list)
 
+@app.route('/updatelevel',methods=['GET','POST'])
+def updatelevel():
+  api_key = request.cookies.get('api_key')
+  level = int(request.args.get('level'))
+  if api_key:
+    users = User.query.filter_by(api_key = api_key).all()
+    if users:
+      user = users[0]
+      user.level = level
+      db.session.add(user)
+      db.session.commit()
+      return "200 Ok"
+    else: 
+      return "No such User"
+  else:
+      return "No such User"
+
+@app.route('/',methods=['GET','POST'])
+def server_start():
+  return render_template('index.html')
 
 # Create DB
 def create_db():

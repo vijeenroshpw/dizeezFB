@@ -76,8 +76,8 @@ var QuestionCollection = Backbone.Collection.extend({
 var UserView = Backbone.View.extend({
   template:$('#user-template').html(),
   el:'#user-info',
-  render:function() {
-    compiledTemplate = _.template(this.template,this.model.toJSON());
+  render:function(user_data) {
+    compiledTemplate = _.template(this.template,user_data);
     this.$el.html(compiledTemplate);
   }
 });
@@ -96,9 +96,11 @@ var ChoiceView = Backbone.Marionette.ItemView.extend({
     if(old_answer) {
       old_answer.set({'active' : false}, {silent : true});
     }
-    Mousetrap.trigger('down');
+    //Mousetrap.trigger('down');
     this.model.get('parentQuestion').set('answered', true);
     this.model.save({'active' : true});
+    //Mousetrap.trigger('down');
+    gameOver(this.model);                  //-- Checks to see if game ended
   }
 });
 
@@ -206,33 +208,82 @@ function selectCategory() {
   App.start();
    
 }
+function gameOver(choice) {
+  //-- Number of questions got correctly marked updated
+  if(choice.get('correct') == 1) 
+    numCorrect++;
+  
+  //-- Update number of tries
+  numTry++;
 
+  //-- When all questions are correctly answered game ends
+  if(numCorrect == numQuestions) {
+    
+    //-- Checking if level passed:
+    if(numTry <= MAXMARKINGS ) {
+      if(playing_level == last_unlocked_level){
+        alert('Voila You have unlocked a new Level ');
+        //-- code for updating the user level, 
+        $.ajax({ url:'/updatelevel',
+                   type:'GET',
+                   data:{'level':parseInt(last_unlocked_level) + 1},
+                   success:function(data) {
+                     console.log("Level Updated !!!");
+                   }
+               });
+
+        //-- followed by code for updating level cookie
+        $.cookie('level',last_unlocked_level + 1);
+  
+      } else {
+        alert('Cool , You have prooven yourself a Geek in this level !!!!');
+      }
+    } else {
+      alert('Good Play, Need to imporve !!!');
+    }
+  }
+}
+  
 //
 //-- A P P  I N I T
 //
 var App = new Backbone.Marionette.Application(),
     questions = new QuestionCollection({}),
     gameview = null,
-    start = null,
-    user = null,
-    fb_id = "xxxxxxxxxx",
-    user_name = "Anonymous",
-    profile_pic = "",
-    user_view = null;
+    numQuestions = 0,
+    numCorrect = 0,
+    MAXMARKINGS = 80,          //-- Maximum number of tries that user can try for passing a level. if numtry>80 level is not passed
+    fb_id = $.cookie('fb_id'),
+    user_name = $.cookie('user_name'),
+    profile_pic = $.cookie('profile_pic'),
+    last_unlocked_level = parseInt($.cookie('level')),
+    playing_level = 0,
+    numTry = 0;
+
+
+//-- Displays User Information
+userview = new UserView();
+userview.render({'name':user_name,'profile_pic':profile_pic});
+
 
 App.addRegions({
   main : '#content'
 });
 
 App.addInitializer(function() {
-    start = function() {
+    
     questions.fetch({async : false});
-    //Filter 1
 
-    //Filter 2
 
-    //Finaly applying user selected category
+    //-- Generating Questions based on Levels
+    //-- At present level 1 ==> Category 1 ,level 2 ==> Category 2 etc.
+    //-- This area can be modified to add specific questions selection 
+    //-- criteria later    
     cat_id = parseInt($('#cselect').val());
+    
+    //-- Set the current Playing level
+    playing_level = cat_id
+    
     $('#select-category').hide();
     qc = new QuestionCollection();
     quests = questions.filter(function(q) {
@@ -240,58 +291,14 @@ App.addInitializer(function() {
       else return false;
     });
     //console.log(JSON.stringify(qc)); 
+
+    //-- Store some important informations
+    numQuestions = qc.length;
+
     gameview = new GameView({collection:qc});
     
   
     App.main.show( gameview  );
-  }
-  user = new User({'id':fb_id,'name':user_name});
-  //-- fetches and sets profile pic 
-  //-- any code that does the ui population relating to FB content will go here
-  FB.api('/me/picture',function(response) {
-          //profile_pic = response.data.url;
-          // -- Anonymous.jpg is NOT an anonymous user symbol, please find a better one
-          profile_pic = (response.data)?response.data.url:"/img/Anonymous.jpg";
-          user.set({'profile_pic':profile_pic});
-          user_view = new UserView({'model':user});
-          user_view.render();
-  });
+  
 });
 
-//-- Javascript Facebook
-//-- For Authentication
-window.fbAsyncInit = function() {
-  //--  init the FB JS SDK
-  FB.init({
-    appId      : '159866620823022',
-    status     : true,
-    xfbml      : true
-  });
-
-  //-- Clears cookie
-  $.cookie('api_key','');
-
-  //-- Facebook Login
-  FB.login(function(response) {
-    if (response.authResponse) {
-      console.log('Welcome!  Fetching your information.... ');
-      //-- Fetches user information
-      FB.api('/me', function(response) {
-        user_name = response.name;                        //sets the username
-        fb_id =  response.id;                             // sets FB ID
-        //App.start();
-      });
-    } else {
-      console.log('User cancelled login or did not fully authorize.');
-      //App.start();                   //starts the application here
-    }
-  });
-};
-
-(function(d, s, id){
-   var js, fjs = d.getElementsByTagName(s)[0];
-   if (d.getElementById(id)) {return;}
-   js = d.createElement(s); js.id = id;
-   js.src = "//connect.facebook.net/en_US/all.js";
-   fjs.parentNode.insertBefore(js, fjs);
- }(document, 'script', 'facebook-jssdk'));

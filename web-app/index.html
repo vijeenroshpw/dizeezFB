@@ -1,72 +1,157 @@
-<!DOCTYPE HTML>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Dizeez</title>
-    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/style.css">
-  </head>
-  <body>
-    <div id='user-info'></div>
-    <div id='select-category' style='margin:30px auto;width:300px;'>
-      <select id='cselect'>
-        {% for category in categories %}
-          <option value='{{ category.id }}'> {{ category.text }} </option>
-        {% endfor %}
-      </select><br/>
-      <button onclick='selectCategory()'> Start </button> 
-    </div>
-    <div id="content" class="container"></div>
+	<head>
+		<title> Dizeez </title>
+		<style type=text/css >
+		
+			#progress {
+				border:2px solid white;
+				height:10px;
+				width:180px;
+				margin-left:280px;
+	
+			}
+			#indicator {
+				background-color:#CCFF33;
+				width:10px;
+				height:10px;
+			
+			}
+		</style>
+	</head>
+	<body   >
+		<div style="height:400px;background-color:#000000;">
+			<div id=logo  style="margin-left:230px;margin-top:50px;">
+				<img src="/img/dizeez.jpg" height=300px width=300px >
+			</div>
 
-    <!-- Game Template -->
-    <script type="text/template" id="game-template">
-      <div class="row">
-        <div class="span4 game question"></div>
-        <div class="span2 game list" style="overflow-y:scroll;height:200px;"><ol></ol></div>
-        <div class="span2 game score"></div>
-      </div>
-    </script>
-    <!-- User Template -->
-    <script type="text/template" id="user-template">
-      <center><img src="<%= profile_pic %>" width='100px' height='100px'></center>
-      <p align="center"><%= name %></p>
-    </script>
-    <!-- Choice Template -->
-    <script type="text/template" id="choice-template">
-      <input type="radio" name="optionsRadios" value="<%= correct %>" <%= active ? 'checked' : '' %>>
-      <p class="<% if(active) { %> <%= correct ? 'text-success' : 'text-error' %> <% } %>"><%= text %></p>
-    </script>
+			<div id=progress > 
+				<div id=indicator style="width:180"> </div>
+			</div>
+			<div id=starter style="margin-left:310px;font-size:20px;margin-top:10px;">
+                		<a  href='/play' align=center> Ready To Go</a>
+		 	</div>
 
-    <!-- Question Template -->
-    <script type="text/template" id="question-template">
-      <p class="lead"><%= text %></p>
-      <div id="choices"></div>
-    </script>
+		</div>
 
-    <!-- Question Item Template -->
-    <script type="text/template" id="question-item-template">
-      <p class="<%= answered ? 'text-info' : 'muted' %>">
-        <% if(active) { %>
-          <strong><%= text %></strong>
-        <% } else { %>
-          <%= text %>
-        <% } %>
-      </p>
-    </script>
+               <script type="text/javascript" src="/js/lib/jquery-1.10.2.js"></script>
+               <script type="text/javascript" src="/js/lib/jquery-cookie.js"></script>
+               <script type="text/javascript" src="/js/lib/underscore.js"></script>
+               <script type="text/javascript" src="/js/lib/backbone.js"></script>
+  
+		<!--          Bootstrap Not Needed in this Page 
+		<script src="js/bootstrap/js/bootstrap.min.js"> </script>
+		<link href="js/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+                --> 
+		<script type=text/javascript>
+			indicator = document.getElementById("indicator");
+			start = document.getElementById("starter");
+			var k = 0;
+			$("#starter").hide();
+			var i =0;
+			function update() {
+				if(i < 180)
+					i+=10;
+				if(i >= 180) { 
+					//$("#starter").show();
+					clearInterval(k);
+				}
+				indicator.style.width=i;
+			}
 
-    <!-- Score Template -->
-    <script type="text/template" id="game-score-template">
-      <p class="lead"><%= collection.where({active : true, correct : 1}).length %></p>
-    </script>
+			 t =  setInterval(update,100);
+			 k = t
+</script>
+<script type='text/javascript'>
+var User = Backbone.Model.extend({
+  url:'/api/v1/user',
+  defaults: {
+    'name'    : "",
+    'api_key' : "",
+    'level'   : -1
+  },
+  initialize: function() {
+    this.bind('change:api_key',this.changeAPIKey);
+    if(this.authenticated()){
+      this.set('api_key',$.cookie('api_key'));
+      //this.fetch({'success':start});
+      this.fetch();
+    } else {
+      //this.save({},{'success':start});
+      this.save({});
+    }
+  },
 
-    <script type="text/javascript" src="/js/lib/jquery-1.10.2.js"></script>
-    <script type="text/javascript" src="/js/lib/jquery-cookie.js"></script>
-    <script type="text/javascript" src="/js/lib/underscore.js"></script>
-    <script type="text/javascript" src="/js/lib/backbone.js"></script>
-    <script type="text/javascript" src="/js/lib/backbone-relational.js"></script>
-    <script type="text/javascript" src="/js/lib/backbone.marionette.js"></script>
-    <script type="text/javascript" src="/js/lib/bootstrap.js"></script>
-    <script type="text/javascript" src="/js/lib/mousetrap.js"></script>
-    <script type="text/javascript" src="/js/app.js"></script>
-  </body>
+  authenticated: function() {
+    return Boolean($.cookie('api_key'));
+  },
+  changeAPIKey: function() {
+    $.cookie('api_key',this.get('api_key'));
+  }
+});
+
+
+var user = null,
+  fb_id = "xxxxxxxxxx",
+  user_name="Anonymous",
+  profile_pic = "";
+
+//-- U T I L S
+
+function initializeUser() {
+  user = new User({'id':fb_id,'name':user_name});
+  FB.api('/me/picture',function(response) { 
+    profile_pic = (response.data)?response.data.url:"/img/Anonymous.jpg";
+    // NOW SAVE profile_pic, fb_id,user_name in cookiesa
+    $.cookie('fb_id',fb_id);
+    $.cookie('user_name',user_name);
+    $.cookie('profile_pic',profile_pic);
+    $.cookie('level',user.get('level'));
+    // Show start game button
+    $("#starter").show();
+  });
+} 
+ 
+  //-- Javascript Facebook
+  //-- For Authentication
+  window.fbAsyncInit = function() {
+    //--  init the FB JS SDK
+    FB.init({
+      appId      : '159866620823022',
+      status     : true,
+      xfbml      : true
+    });
+
+    //-- Clears cookie
+    $.cookie('api_key','');
+
+    FB.login(function(response) {
+      if (response.authResponse) {
+        console.log('Welcome! Fetching Data !!! ');
+   
+        FB.api('/me', function(response) {
+          user_name = response.name;                        //sets the username
+          fb_id =  response.id;                             // sets FB ID
+          initializeUser();                                 // initializes user
+      });
+    
+      
+    } else {
+      console.log('User cancelled login / login Failed');
+          initializeUser();                                 // initialize user
+    }
+  });
+};
+
+(function(d, s, id){
+   var js, fjs = d.getElementsByTagName(s)[0];
+   if (d.getElementById(id)) {return;}
+   js = d.createElement(s); js.id = id;
+   js.src = "//connect.facebook.net/en_US/all.js";
+   fjs.parentNode.insertBefore(js, fjs);
+ }(document, 'script', 'facebook-jssdk'));
+
+
+  </script>
+ </body>
 </html>
+
