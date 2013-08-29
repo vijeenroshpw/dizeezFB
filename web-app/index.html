@@ -73,11 +73,11 @@ var User = Backbone.Model.extend({
     this.bind('change:api_key',this.changeAPIKey);
     if(this.authenticated()){
       this.set('api_key',$.cookie('api_key'));
-      //this.fetch({'success':start});
-      this.fetch();
+      this.fetch({'success':start});
+      //this.fetch();
     } else {
-      //this.save({},{'success':start});
-      this.save({});
+      this.save({},{'success':start});
+      //this.save({});
     }
   },
 
@@ -91,6 +91,7 @@ var User = Backbone.Model.extend({
 
 
 var user = null,
+  start = null,
   fb_id = "xxxxxxxxxx",
   user_name="Anonymous",
   profile_pic = "";
@@ -98,17 +99,21 @@ var user = null,
 //-- U T I L S
 
 function initializeUser() {
+  //user = new User({'id':fb_id,'name':user_name});
+  start = function() {
+    FB.api('/me/picture',function(response) { 
+      profile_pic = (response.data)?response.data.url:"/img/Anonymous.jpg";
+      // NOW SAVE profile_pic, fb_id,user_name in cookiesa
+      $.cookie('fb_id',fb_id);
+      $.cookie('user_name',user_name);
+      $.cookie('profile_pic',profile_pic);
+      $.cookie('level',user.get('level'));
+      // Show start game button
+      $("#starter").show();
+    });
+  }
   user = new User({'id':fb_id,'name':user_name});
-  FB.api('/me/picture',function(response) { 
-    profile_pic = (response.data)?response.data.url:"/img/Anonymous.jpg";
-    // NOW SAVE profile_pic, fb_id,user_name in cookiesa
-    $.cookie('fb_id',fb_id);
-    $.cookie('user_name',user_name);
-    $.cookie('profile_pic',profile_pic);
-    $.cookie('level',user.get('level'));
-    // Show start game button
-    $("#starter").show();
-  });
+  
 } 
  
   //-- Javascript Facebook
