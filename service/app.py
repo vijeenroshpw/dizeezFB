@@ -10,7 +10,7 @@ from flask.ext.admin import Admin, BaseView, expose
 from flask.ext import admin
 from flask.ext.admin.contrib.sqlamodel import ModelView
 from flask.ext.admin.actions import action
-
+import urllib, urllib2
 #
 # A P P  C O N F I G
 #
@@ -21,6 +21,7 @@ APP_SECRET = config.APP_SECRET
 AUTH_URL = config.AUTH_URL
 APP_ID = config.APP_ID
 ADMINPASS = config.ADMINPASS
+ACCESS_TOKEN = config.ACCESS_TOKEN
 
 #-- Global app object
 app = Flask(__name__,
@@ -531,8 +532,10 @@ admin.add_view(LogoutView(name="Logout"))
 #-- Routes 
 @app.route('/play',methods=['GET','POST'])
 def index():
-  level=int(request.cookies.get('level'))
-  return render_template('play.html',categories=Category.query.all(),levels=range(1,level+1))
+  api_key=request.cookies.get('api_key')     
+  user = User.query.filter_by(api_key = api_key)[0]
+  
+  return render_template('play.html',categories=Category.query.all(),levels=range(user.level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = user.level)
 
 
 
@@ -561,7 +564,7 @@ def searchquestion():
     question_list.append(question.text)
   return json.dumps(question_list)
 
-@app.route('/updatelevel',methods=['GET','POST'])
+@app.route('/api/v1/updatelevel',methods=['GET','POST'])
 def updatelevel():
   api_key = request.cookies.get('api_key')
   level = int(request.args.get('level'))
@@ -577,7 +580,22 @@ def updatelevel():
       return "No such User"
   else:
       return "No such User"
-
+@app.route('/api/v1/updateachievement',methods=['GET','POST'])
+def updateachievement():
+  api_key = request.cookies.get('api_key')
+  new_achievement = request.args.get('achieved')
+  print new_achievement
+  users = User.query.filter_by(api_key = api_key)
+  user = users[0]
+  facebook_id = user.fb_id
+  url = 'https://graph.facebook.com/' + facebook_id + '/achievements'
+  payload = urllib.urlencode({'access_token':ACCESS_TOKEN,
+                            'achievement':'http://vijeenroshpw.pythonanywhere.com/achievements/ach'+str(new_achievement)+'.html'})
+  req = urllib2.Request(url,payload)
+  response = urllib2.urlopen(req)
+  return response.read()
+  
+ 
 @app.route('/',methods=['GET','POST'])
 def server_start():
   return render_template('index.html')

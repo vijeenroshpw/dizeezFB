@@ -208,6 +208,36 @@ function selectCategory() {
   App.start();
    
 }
+function updateScore(score) {
+  if( user_name != "Anonymous") {
+    FB.api('/me/scores','post',{'score':score},function(response) {
+      console.log(JSON.stringify(response));
+    });
+  }
+}
+
+function updateLevel(level) {
+  $.ajax({ url:'/api/v1/updatelevel',
+    type:'GET',
+    data:{'level':level},
+    success:function(data) {
+      console.log("Level Updated !!!");
+    }
+  });
+}
+ 
+function updateAchievement(new_achievement) {
+  if(user_name != "Anonymous") {
+    $.ajax({url:'/api/v1/updateachievement',
+            type:'GET',
+            data:{'achieved':new_achievement},
+            success:function(data) {
+              console.log(JSON.stringify(data));
+            }
+    });
+  }
+}
+
 function gameOver(choice) {
   //-- Number of questions got correctly marked updated
   if(choice.get('correct') == 1) 
@@ -224,19 +254,12 @@ function gameOver(choice) {
       if(playing_level == last_unlocked_level){
         alert('Voila You have unlocked a new Level ');
         //-- code for updating the user level, 
-        $.ajax({ url:'/updatelevel',
-                   type:'GET',
-                   data:{'level':parseInt(last_unlocked_level) + 1},
-                   success:function(data) {
-                     console.log("Level Updated !!!");
-                   }
-               });
-
-        //-- followed by code for updating level cookie
-        $.cookie('level',last_unlocked_level + 1);
-  
+       
+        updateLevel(playing_level + 1);
+        updateAchievement(playing_level); 
       } else {
         alert('Cool , You have prooven yourself a Geek in this level !!!!');
+        //-- code for showong play next game
       }
     } else {
       alert('Good Play, Need to imporve !!!');
@@ -253,10 +276,10 @@ var App = new Backbone.Marionette.Application(),
     numQuestions = 0,
     numCorrect = 0,
     MAXMARKINGS = 80,          //-- Maximum number of tries that user can try for passing a level. if numtry>80 level is not passed
-    fb_id = $.cookie('fb_id'),
-    user_name = $.cookie('user_name'),
+    //fb_id = $.cookie('fb_id'),
+    //user_name = $.cookie('user_name'),
     profile_pic = $.cookie('profile_pic'),
-    last_unlocked_level = parseInt($.cookie('level')),
+    //last_unlocked_level = parseInt($.cookie('level')),
     playing_level = 0,
     numTry = 0;
 

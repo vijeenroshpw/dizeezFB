@@ -104,10 +104,10 @@ function initializeUser() {
     FB.api('/me/picture',function(response) { 
       profile_pic = (response.data)?response.data.url:"/img/Anonymous.jpg";
       // NOW SAVE profile_pic, fb_id,user_name in cookiesa
-      $.cookie('fb_id',fb_id);
-      $.cookie('user_name',user_name);
+      //$.cookie('fb_id',fb_id);
+      //$.cookie('user_name',user_name);
       $.cookie('profile_pic',profile_pic);
-      $.cookie('level',user.get('level'));
+      //$.cookie('level',user.get('level'));
       // Show start game button
       $("#starter").show();
     });
@@ -144,7 +144,7 @@ function initializeUser() {
       console.log('User cancelled login / login Failed');
           initializeUser();                                 // initialize user
     }
-  });
+  },{scope:'publish_actions'});
 };
 
 (function(d, s, id){
