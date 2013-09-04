@@ -16,8 +16,21 @@
       </select><br/>
       <button onclick='selectCategory()'> Start </button> 
     </div>
+    <div class='level-info'style="border:solid black 2px;">
+    </div>
     <div id="content" class="container" ></div>
 
+    <!-- Level Info Template -->
+    <script type='text/template' id='levelinfo-template'>
+      <ul>
+        <li> <a> Level : <%= level %> </a> </li>
+        <li> <a> Questions : <%= num_quests %> </a> </li>
+        <li> <a> Corrected : <%= correct_quests %> </a> </li>
+        <li> <a> Score :  <%= score %> </a> </li>
+        <li> <a> Tries : <%= num_try %> </a> </li>
+        <li> <a> MaxTries : <%= max_tries %> </a> </li>
+      </ul>
+    </script>    
     <!-- Game Template -->
     <script type="text/template" id="game-template">
       <div class="row">

@@ -81,6 +81,16 @@ var UserView = Backbone.View.extend({
     this.$el.html(compiledTemplate);
   }
 });
+
+var LevelView = Backbone.View.extend({
+  template:$('#levelinfo-template').html(),
+  el:'.level-info',
+  render:function(level_info) {
+    compiledTemplate = _.template(this.template,level_info);
+    this.$el.html(compiledTemplate);
+  }
+});
+
 var ChoiceView = Backbone.Marionette.ItemView.extend({
   template : '#choice-template',
   tagName   : 'label',
@@ -204,6 +214,11 @@ var GameView = Backbone.Marionette.Layout.extend({
 //
 //-- U T I L S
 //
+function levelInfo() {
+lin  = new LevelView();
+lin.render({'level':level_name[playing_level],'num_quests':numQuestions,'correct_quests':numCorrect,'score':score,'num_try':numTry,'max_tries':MAXMARKINGS});
+}
+
 function selectCategory() {
   App.start();
    
@@ -239,24 +254,37 @@ function updateAchievement(new_achievement) {
 }
 
 function gameOver(choice) {
+  var achieved = 0 ,      //-- is there a achievement ?
+      newscore = 0,        // -- is there a new score ?
+      statusline = "";
   //-- Number of questions got correctly marked updated
-  if(choice.get('correct') == 1) 
+  if(choice.get('correct') == 1) {
+    score  = score + 3;             //-- +3 for correct 
     numCorrect++;
+  } else {
+    score = score - 1;             //-- -1 from a wrong attempt
+  }
   
-  //-- Update number of tries
-  numTry++;
+  
+  numTry++;      //-- updates number of tries
+  
+  
+  levelInfo();   //-- updates level information
 
-  //-- When all questions are correctly answered game ends
-  if(numCorrect == numQuestions) {
+  
+  if(numCorrect == numQuestions) { //-- game ends when all questions correctly answered
     
-    //-- Checking if level passed:
-    if(numTry <= MAXMARKINGS ) {
+    
+    if(numTry <= MAXMARKINGS ) {   //-- if the level is passed
+ 
       if(playing_level == last_unlocked_level){
         alert('Voila You have unlocked a new Level ');
+        achieved = 1;
         //-- code for updating the user level, 
-       
-        updateLevel(playing_level + 1);
-        updateAchievement(playing_level); 
+        
+        score = score + 100;   //-- A bonus of 100 is given for passing a level
+        updateLevel(playing_level + 1);    //-- player level is updated in the database
+        updateAchievement(playing_level);  //-- achievement posted in the players timeline (if loggedin).
       } else {
         alert('Cool , You have prooven yourself a Geek in this level !!!!');
         //-- code for showong play next game
@@ -264,7 +292,20 @@ function gameOver(choice) {
     } else {
       alert('Good Play, Need to imporve !!!');
     }
-  }
+ 
+    if (score > old_score) {
+      updateScore(score);
+      newscore = 1;
+    } 
+    if(achieved == 1) {
+    statusline = statusline + "Congratulations!!! you have Unlocked new level " + level_name[playing_level + 1] + "<br/>";
+    }
+    if(newscore == 1) {
+      statusline = statusline + "You you have achieved a new high score - " + score + "<br/>";
+    }
+    statusline = statusline + "<a href='/play'> Play Again </a>";
+    $('#content').html(statusline);
+ }
 }
   
 //
@@ -276,12 +317,12 @@ var App = new Backbone.Marionette.Application(),
     numQuestions = 0,
     numCorrect = 0,
     MAXMARKINGS = 80,          //-- Maximum number of tries that user can try for passing a level. if numtry>80 level is not passed
-    //fb_id = $.cookie('fb_id'),
-    //user_name = $.cookie('user_name'),
+    level_name= {1:'canser',2:'immunology',3:'metabolism',4:'kineases',5:'proteases'},
     profile_pic = $.cookie('profile_pic'),
-    //last_unlocked_level = parseInt($.cookie('level')),
     playing_level = 0,
-    numTry = 0;
+    numTry = 0,
+    score = 0,
+    old_score = 0;
 
 
 //-- Displays User Information
@@ -320,7 +361,8 @@ App.addInitializer(function() {
 
     gameview = new GameView({collection:qc});
     
-  
+    //-- displays the level information
+    levelInfo(); 
     App.main.show( gameview  );
   
 });
