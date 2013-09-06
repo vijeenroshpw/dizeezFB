@@ -43,6 +43,7 @@
     <script type="text/template" id="user-template">
       <center><img src="<%= profile_pic %>" width='50px' height='50px'></center>
       <p align="center"><%= name %></p>
+       <% if(score != -1) { %> <center><%= score %></center> <% } %>  
     </script>
     <!-- Choice Template -->
     <script type="text/template" id="choice-template">

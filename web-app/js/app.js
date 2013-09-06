@@ -187,7 +187,7 @@ var GameView = Backbone.Marionette.Layout.extend({
     var self = this;
     this.question.show( new QuestionView({model : this.collection.at(0)}) );
     this.list.show( new QuestionCollectionView(this.options) );
-    this.score.show( new ScoreView({collection : new ChoiceCollection(_.flatten(_.map(self.collection.pluck('choices'), function(collection) { return collection.models }))) }) );
+    //this.score.show( new ScoreView({collection : new ChoiceCollection(_.flatten(_.map(self.collection.pluck('choices'), function(collection) { return collection.models }))) }) );
 
     Mousetrap.bind(['down', 'right'], function() { self.loop(1); });
     Mousetrap.bind(['up', 'left'], function() { self.loop(-1); })
@@ -214,6 +214,21 @@ var GameView = Backbone.Marionette.Layout.extend({
 //
 //-- U T I L S
 //
+
+function showPreviousScore() {
+     if(user_name != "Anonymous") {
+       FB.api('/' + fb_id + '/scores',function(response) {
+         if(response.data.length) {
+           old_score = response.data[0].score;
+           userview.render({'name':user_name,'profile_pic':profile_pic,'score':response.data[0].score});
+           console.log(JSON.stringify(response));
+         } else {
+           old_score = 0;
+         }
+       });
+     }
+}
+
 function levelInfo() {
 lin  = new LevelView();
 lin.render({'level':level_name[playing_level],'num_quests':numQuestions,'correct_quests':numCorrect,'score':score,'num_try':numTry,'max_tries':MAXMARKINGS});
@@ -225,6 +240,7 @@ function selectCategory() {
 }
 function updateScore(score) {
   if( user_name != "Anonymous") {
+    
     FB.api('/me/scores','post',{'score':score},function(response) {
       console.log(JSON.stringify(response));
     });
@@ -254,46 +270,45 @@ function updateAchievement(new_achievement) {
 }
 
 function gameOver(choice) {
-  var achieved = 0 ,      //-- is there a achievement ?
-      newscore = 0,        // -- is there a new score ?
+  var achieved = 0 ,                          //-- is there a achievement ?
+      newscore = 0,                           // -- is there a new score ?
       statusline = "";
-  //-- Number of questions got correctly marked updated
+                                              //-- Number of questions got correctly marked updated
   if(choice.get('correct') == 1) {
-    score  = score + 3;             //-- +3 for correct 
+    score  = score + 3;                       //-- +3 for correct 
     numCorrect++;
+    Mousetrap.trigger('down');                //-- shows next question
   } else {
-    score = score - 1;             //-- -1 from a wrong attempt
+    score = score - 1;                        //-- -1 from a wrong attempt
   }
   
   
-  numTry++;      //-- updates number of tries
+  numTry++;                                   //-- updates number of tries
   
   
-  levelInfo();   //-- updates level information
+  levelInfo();                                //-- updates level information
 
   
-  if(numCorrect == numQuestions) { //-- game ends when all questions correctly answered
+  if(numCorrect == numQuestions) {            //-- game ends when all questions correctly answered
     
     
-    if(numTry <= MAXMARKINGS ) {   //-- if the level is passed
+    if(numTry <= MAXMARKINGS ) {              //-- if the level is passed
  
       if(playing_level == last_unlocked_level){
-        alert('Voila You have unlocked a new Level ');
         achieved = 1;
-        //-- code for updating the user level, 
+                                              //-- code for updating the user level, 
         
-        score = score + 100;   //-- A bonus of 100 is given for passing a level
-        updateLevel(playing_level + 1);    //-- player level is updated in the database
-        updateAchievement(playing_level);  //-- achievement posted in the players timeline (if loggedin).
+        score = score + 10 * playing_level;   //-- A bonus is given for  passing a level
+        updateLevel(playing_level + 1);       //-- player level is updated in the database
+        updateAchievement(playing_level);     //-- achievement posted in the players timeline (if loggedin).
       } else {
-        alert('Cool , You have prooven yourself a Geek in this level !!!!');
-        //-- code for showong play next game
+                                              //-- code for showong play next game
       }
     } else {
       alert('Good Play, Need to imporve !!!');
     }
  
-    if (score > old_score) {
+    if (score > old_score) {       //-- score need only be published if its new high score
       updateScore(score);
       newscore = 1;
     } 
@@ -327,7 +342,7 @@ var App = new Backbone.Marionette.Application(),
 
 //-- Displays User Information
 userview = new UserView();
-userview.render({'name':user_name,'profile_pic':profile_pic});
+userview.render({'name':user_name,'profile_pic':profile_pic,'score':-1});
 
 
 App.addRegions({
@@ -339,13 +354,14 @@ App.addInitializer(function() {
     questions.fetch({async : false});
 
 
-    //-- Generating Questions based on Levels
-    //-- At present level 1 ==> Category 1 ,level 2 ==> Category 2 etc.
-    //-- This area can be modified to add specific questions selection 
-    //-- criteria later    
+                                        //-- Generating Questions based on Levels
+                                        //-- At present level 1 ==> Category 1 ,level 2 ==> Category 2 etc.
+                                        //-- This area can be modified to add specific questions selection 
+                                        //-- criteria later    
+   
     cat_id = parseInt($('#cselect').val());
     
-    //-- Set the current Playing level
+                                        //-- Set the current Playing level
     playing_level = cat_id
     
     $('#select-category').hide();
@@ -354,21 +370,22 @@ App.addInitializer(function() {
       if( q.get('categories').indexOf(cat_id) != -1 ) {qc.add(q);return true;}
       else return false;
     });
-    //console.log(JSON.stringify(qc)); 
 
-    //-- Store some important informations
-    numQuestions = qc.length;
-
+                                 
+    numQuestions = qc.length;           //-- number of questions
+    MAXMARKINGS = numQuestions * 2;     //-- a average of two tries per questions
     gameview = new GameView({collection:qc});
+    showPreviousScore();                //-- displays previous max score
     
-    //-- displays the level information
-    levelInfo(); 
-    App.main.show( gameview  );
+
+    levelInfo();                        //-- Displays the level information
+    App.main.show( gameview  );         //-- initializes the games
   
 });
+  
 
-  //-- Javascript Facebook
-  //-- For Authentication
+                                        //-- Javascript Facebook
+                                        //-- For Authentication
   window.fbAsyncInit = function() {
     //--  init the FB JS SDK
     FB.init({
@@ -376,7 +393,7 @@ App.addInitializer(function() {
       status     : true,
       xfbml      : true
     });
-
+    
 };
 
 (function(d, s, id){
