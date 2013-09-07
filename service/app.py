@@ -22,6 +22,7 @@ AUTH_URL = config.AUTH_URL
 APP_ID = config.APP_ID
 ADMINPASS = config.ADMINPASS
 ACCESS_TOKEN = config.ACCESS_TOKEN
+ACHIEVEMENT_DOMAIN = config.ACHIEVEMENT_DOMAIN
 
 #-- Global app object
 app = Flask(__name__,
@@ -31,7 +32,7 @@ app = Flask(__name__,
 
 #-- Admin Handle
 class AdminHomeView(admin.AdminIndexView):
- 
+
   @expose('/',methods=['GET','POST'])
   def index(self):
     questions = len(Question.query.all())
@@ -55,7 +56,7 @@ class AdminHomeView(admin.AdminIndexView):
       else:
         return render_template('adminlogin.html')
 
-      
+
 
 admin = Admin(app ,index_view = AdminHomeView())
 
@@ -71,9 +72,9 @@ db = SQLAlchemy(app)
 
 def get_questions(api_key='',method=1):
   ''' Accepts api_key and a paramteter method. Method
-      determines the criteria by which the questions 
+      determines the criteria by which the questions
       are generated.Currently only one method is de-
-      fined. "1 Random Question Selection" 
+      fined. "1 Random Question Selection"
   '''
   #-- Selects 1000 questions at random
   if method ==1:
@@ -84,15 +85,15 @@ def get_questions(api_key='',method=1):
   elif method == 2:
     pass
   #-- Action corresponding to method 3 etc,
-  
+
   elif method == 3:
     pass
-  
+
   else:
     pass
 
 def create_if_not_choice(choice_text=""):
-  ''' 
+  '''
       if this choice do exist ,return its id, else
       create that choice and return its id
   '''
@@ -141,10 +142,10 @@ class QCATAssociation(db.Model):
   question    = db.relationship("Question")
 
   def __repr__(self):
-    return "<Accoc cat_id %d : q_id %d >"%(self.category_id, self.question_id)  
+    return "<Accoc cat_id %d : q_id %d >"%(self.category_id, self.question_id)
 
 class GQAssociation(db.Model):
-  #-- Game Question Association 
+  #-- Game Question Association
   id = db.Column(db.Integer,primary_key = True)
   game_id = db.Column(db.Integer,db.ForeignKey('game.id'))
   question_id = db.Column(db.Integer,db.ForeignKey('question.id'))
@@ -175,15 +176,15 @@ class Question(db.Model):
 
   def get_choice_list(self):
     #V: Could you explain what goes on here, this function will start to get more complicated so lets preparea
-    #-- Currently this method fetches 
+    #-- Currently this method fetches
     choice_list = []
     correct = 0
     for i in self.choices:
       choice = i.choice
       if self.correct_choice_id == choice.id :
         correct = 1
-      choice_list.append(dict(choice_id = choice.id, 
-                              text = choice.text, 
+      choice_list.append(dict(choice_id = choice.id,
+                              text = choice.text,
                               correct = correct))
       correct = 0
     random.shuffle(choice_list)           #-- shuffles the choices , important
@@ -205,11 +206,11 @@ class Category(db.Model):
   id            = db.Column(db.Integer, primary_key = True)
   text          = db.Column(db.String(240))
   created       = db.Column(db.DateTime)
-        #point to QCATAssociaton object, while each such object points to a uniqe question object      
+        #point to QCATAssociaton object, while each such object points to a uniqe question object
         #Many to Many relation on Category , Questions
 
   questions     = db.relationship("QCATAssociation")
-  
+
   def __init__(self,ctext):
     self.text  = ctext
     self.created = datetime.now()
@@ -224,7 +225,7 @@ class User(db.Model):
   name        = db.Column(db.String(100))
   api_key     = db.Column(db.Text)
   level       = db.Column(db.Integer,default = 1)
-  
+
   def __init__(self,name = "",api_key = "",fb_id = ""):
     self.name = name
     self.api_key = api_key
@@ -239,7 +240,7 @@ class User(db.Model):
              'api_key':self.api_key,
               'level':self.level }
 
-    
+
 
 class Game(db.Model):
   id = db.Column(db.Integer,primary_key = True)
@@ -251,7 +252,7 @@ class Game(db.Model):
   num_questions = db.Column(db.Integer)
   user_agent = db.Column(db.String(150))
   player_ip = db.Column(db.String(30))
-  
+
   logs = db.relationship('Log', backref = 'parentGame')
 
   def __init__(self,player_id = -1, player_name = "Anonymous", category=-1, num_question=-1,ua="",pip=""):
@@ -284,11 +285,11 @@ class Log(db.Model):
     self.correct = correct
     self.game_id = game_id
     self.timestamp = datetime.now()
- 
+
   def __repr__(self):
     return "<log_id %d, game_id %d , choice_id %d>"%(self.id,self.game_id,self.choice_id)
 
-  
+
 #
 #  A P I
 #
@@ -310,10 +311,10 @@ class Questions(Resource):
       #category_count = len(Category.query.all())     #-- number of categories
       #category = random.randint(1,category_count)    #-- selects a category at random
       #question_count = len(Category.query.get(category).questions)  #-- number of questions belonging to that category
-      
+
       #category = random.choice(Category.query.all())   #-- choose a category at random
       #question_count = len(category.questions)
-      
+
       #Currently method 1 is used. Later a selection process can be implemented
       questions,method = get_questions(args['api_key'],1)
       question_count = len(questions)
@@ -323,16 +324,16 @@ class Questions(Resource):
       #category_instance = Category.query.get(category)  #-- selects category instance
       #questions = [ qcassoc.question for qcassoc in category.questions ]      #-- set of question instances
       #random.shuffle(questions)              #-- shuffles the questions inplace
-      
+
       #game = Game(user.id,user.name,category.id,question_count,env.get('HTTP_USER_AGENT'),env.get('REMOTE_ADDR'))
-      
+
       game = Game(user.id,user.name,method,question_count,env.get('HTTP_USER_AGENT'),env.get('REMOTE_ADDR'))
-      
-      
+
+
       #game.questions = repr([ q.id for q in questions ])
       db.session.add(game)
       db.session.commit()
-      
+
       # Now Populate GQAssociation table
       for quest in questions[0:question_count] :
         gqassoc = GQAssociation()
@@ -340,17 +341,17 @@ class Questions(Resource):
         gqassoc.question_id = quest.id
         db.session.add(gqassoc)
 
-      db.session.commit()     
-      
+      db.session.commit()
+
       #populate session with needed informations
       session['game_id'] = game.id
-      
-     
+
+
       return [i.json_view() for i in questions[0:question_count] ]
 
 class Choices(Resource):
   '''
-    POST: writes the log component 
+    POST: writes the log component
   '''
   def post(self):
     data =  json.loads(request.data)
@@ -358,7 +359,7 @@ class Choices(Resource):
     db.session.add(log)
     db.session.commit()
 
-    
+
 catquest_parser = reqparse.RequestParser()
 catquest_parser.add_argument('category',type=str,location='json')
 catquest_parser.add_argument('questions',type=str,location='json')
@@ -376,7 +377,7 @@ class NewCategoryQuestion(Resource):
         db.session.add(qcat)
       db.session.commit()
 
-          
+
 
 question_parser = reqparse.RequestParser()
 question_parser.add_argument('categories',type=str,location='json')
@@ -407,14 +408,14 @@ class NewQuestion(Resource):
 
     db.session.add(q)
     db.session.commit()
-    
+
     for choice_id in choice_ids:
       qc = QCAssociation()
       qc.question_id = q.id
       qc.choice_id = choice_id
       db.session.add(qc)
     db.session.commit()
-    
+
     for category_id in category_ids:
       qcat = QCATAssociation()
       qcat.category_id = category_id
@@ -477,7 +478,7 @@ class LogoutView(BaseView):
 
 class QuestionAdmin(ModelView):
 
-  column_list = ['text'] 
+  column_list = ['text']
   column_searchable_list = ['text']
 
   def is_accessible(self):
@@ -497,10 +498,10 @@ class QuestionAdmin(ModelView):
       question = Question.query.get(i)
       db.session.delete(question)
       db.session.commit()
- 
+
 class CategoryAdmin(ModelView):
 
- column_list = ['text'] 
+ column_list = ['text']
  column_searchable_list = ['text']
 
  def is_accessible(self):
@@ -517,7 +518,7 @@ class CategoryAdmin(ModelView):
      db.session.delete(category)
      db.session.commit()
 
-     
+
 
 admin.add_view(QuestionAdmin(Question, db.session))
 admin.add_view(ModelView(Choice, db.session))
@@ -529,12 +530,12 @@ admin.add_view(LogoutView(name="Logout"))
 # Main App Center
 #
 
-#-- Routes 
+#-- Routes
 @app.route('/play',methods=['GET','POST'])
 def index():
-  api_key=request.cookies.get('api_key')     
+  api_key=request.cookies.get('api_key')
   user = User.query.filter_by(api_key = api_key)[0]
-  
+
   return render_template('play.html',categories=Category.query.all(),levels=range(user.level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = user.level)
 
 
@@ -576,7 +577,7 @@ def updatelevel():
       db.session.add(user)
       db.session.commit()
       return "200 Ok"
-    else: 
+    else:
       return "No such User"
   else:
       return "No such User"
@@ -590,15 +591,27 @@ def updateachievement():
   facebook_id = user.fb_id
   url = 'https://graph.facebook.com/' + facebook_id + '/achievements'
   payload = urllib.urlencode({'access_token':ACCESS_TOKEN,
-                            'achievement':'http://vijeenroshpw.pythonanywhere.com/achievements/ach'+str(new_achievement)+'.html'})
+                            'achievement': ACHIEVEMENT_DOMAIN + 'achieves/'+str(new_achievement)})
   req = urllib2.Request(url,payload)
   response = urllib2.urlopen(req)
   return response.read()
-  
- 
+
+
 @app.route('/',methods=['GET','POST'])
 def server_start():
   return render_template('index.html')
+
+@app.route('/achieves/<lid>')
+def achievements(lid):
+  achs = {'1':'Cancer','2':'Metabolism','3':'Immunilogy','4':'Mental Health ','5':'Kineases','6':'Proteases','7':'Transcriptio factors','8':'All rounder '}
+  title = achs[lid] + ' Level'
+  url = ACHIEVEMENT_DOMAIN + 'achieves/' + lid
+  desc = 'Conqured Level %s , %s Category ' %(lid,achs[lid])
+  img = ACHIEVEMENT_DOMAIN + 'img/ach' + lid + '.jpeg'
+  point = str(int(lid) * 10)
+  app_id = APP_ID
+  print lid
+  return render_template('/ach.html',title = title,url = url,desc = desc,img = img,point = point,app_id = app_id)
 
 # Create DB
 def create_db():
