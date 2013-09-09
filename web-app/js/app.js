@@ -215,6 +215,22 @@ var GameView = Backbone.Marionette.Layout.extend({
 //-- U T I L S
 //
 
+function showFriendsScore() {
+  //-- NOTE : app_id is used here. If application if changed this need to be changed
+  
+  if(user_name != "Anonymous") {
+    FB.api('/159866620823022/scores',function(response) { 
+      //console.log(JSON.stringify(response));
+      scores = " <center> Score Board <hr/> <br/>"; 
+      for(i = 0;i<response.data.length;i++) {
+        scores = scores + response.data[i].user.name +  " " + response.data[i].score + "<br/><br/>";
+      }
+      scores = scores + "</center>";
+      $(".scoreboard").html(scores);
+    });
+  }
+}
+
 function showPreviousScore() {
      if(user_name != "Anonymous") {
        FB.api('/' + fb_id + '/scores',function(response) {
@@ -245,6 +261,7 @@ function updateScore(score) {
       console.log(JSON.stringify(response));
     });
   }
+
 }
 
 function updateLevel(level) {
@@ -380,7 +397,7 @@ App.addInitializer(function() {
 
     levelInfo();                        //-- Displays the level information
     App.main.show( gameview  );         //-- initializes the games
-  
+    showFriendsScore(); 
 });
   
 
