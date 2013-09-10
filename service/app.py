@@ -600,6 +600,9 @@ def updateachievement():
 @app.route('/',methods=['GET','POST'])
 def server_start():
   return render_template('index.html')
+@app.route('/gameplay',methods=['GET','POST'])
+def game_play():
+  return render_template('gameplay.html')
 
 @app.route('/achieves/<lid>')
 def achievements(lid):
