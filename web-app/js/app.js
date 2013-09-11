@@ -291,7 +291,9 @@ function gameOver(choice) {
       newscore = 0,                           // -- is there a new score ?
       statusline = "";
                                               //-- Number of questions got correctly marked updated
-  if(choice.get('correct') == 1) {
+  if((choice.get('correct') == 1) && (corrected.indexOf(choice.get('parentQuestion').get('id')) == -1) ) {
+    corrected.push(choice.get('parentQuestion').get('id'));
+
     score  = score + 3;                       //-- +3 for correct 
     numCorrect++;
     Mousetrap.trigger('down');                //-- shows next question
@@ -345,6 +347,7 @@ function gameOver(choice) {
 //
 var App = new Backbone.Marionette.Application(),
     questions = new QuestionCollection({}),
+    corrected = [],
     gameview = null,
     numQuestions = 0,
     numCorrect = 0,
