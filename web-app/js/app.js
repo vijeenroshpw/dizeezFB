@@ -338,7 +338,8 @@ function gameOver(choice) {
       statusline = statusline + "You you have achieved a new high score - " + score + "<br/>";
     }
     statusline = statusline + "<a href='/play'> Play Again </a>";
-    $('#content').html(statusline);
+    $('.scoreboard').remove();
+    $('#content').html("<center>" + statusline + "</center>");
  }
 }
   
@@ -352,7 +353,7 @@ var App = new Backbone.Marionette.Application(),
     numQuestions = 0,
     numCorrect = 0,
     MAXMARKINGS = 80,          //-- Maximum number of tries that user can try for passing a level. if numtry>80 level is not passed
-    level_name= {1:'canser',2:'immunology',3:'metabolism',4:'kineases',5:'proteases'},
+    level_name= {1:'canser',2:'Metabolism',3:'Immunology',4:'Mental Health',5:'Kineases',6:'Proteases',7:'Transcription Factor',8:'All Rounder'},
     profile_pic = $.cookie('profile_pic'),
     playing_level = 0,
     numTry = 0,
