@@ -223,7 +223,7 @@ function showFriendsScore() {
       //console.log(JSON.stringify(response));
       scores = " <center> Score Board <hr/> <br/>"; 
       for(i = 0;i<response.data.length;i++) {
-        scores = scores + response.data[i].user.name +  " " + response.data[i].score + "<br/><br/>";
+        scores = scores + "<a href='http://facebook.com/" + response.data[i].user.id + "'>" +response.data[i].user.name +  "</a> " + response.data[i].score + "<br/><br/>";
       }
       scores = scores + "</center>";
       $(".scoreboard").html(scores);
@@ -320,11 +320,12 @@ function gameOver(choice) {
         score = score + 10 * playing_level;   //-- A bonus is given for  passing a level
         updateLevel(playing_level + 1);       //-- player level is updated in the database
         updateAchievement(playing_level);     //-- achievement posted in the players timeline (if loggedin).
+        $.cookie('level',playing_level + 1);  //-- set the level in cookie for anonymous users
       } else {
                                               //-- code for showong play next game
       }
     } else {
-      alert('Good Play, Need to imporve !!!');
+     statusline = statusline + "  Good Play , But need to imporve !!! ";
     }
  
     if (score > old_score) {       //-- score need only be published if its new high score

@@ -143,6 +143,9 @@ function initializeUser() {
       
     } else {
       console.log('User cancelled login / login Failed');
+          $.cookie('level','1');                            //-- For anonymous user set level @ start
+                                                            //-- They have to play through levels each time.
+
           initializeUser();                                 // initialize user
     }
   },{scope:'publish_actions'});

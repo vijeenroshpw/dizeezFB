@@ -535,8 +535,11 @@ admin.add_view(LogoutView(name="Logout"))
 def index():
   api_key=request.cookies.get('api_key')
   user = User.query.filter_by(api_key = api_key)[0]
-
-  return render_template('play.html',categories=Category.query.all(),levels=range(user.level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = user.level)
+  if user.name == "Anonymous":
+    level = int(request.cookies.get('level'))
+    return render_template('play.html',categories=Category.query.all(),levels=range(level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = level)
+  else:
+    return render_template('play.html',categories=Category.query.all(),levels=range(user.level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = user.level)
 
 
 
