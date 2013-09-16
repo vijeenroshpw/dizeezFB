@@ -221,11 +221,11 @@ function showFriendsScore() {
   if(user_name != "Anonymous") {
     FB.api('/159866620823022/scores',function(response) { 
       //console.log(JSON.stringify(response));
-      scores = " <center> Score Board <hr/> <br/>"; 
+      scores = " Score Board <hr/> <br/>"; 
       for(i = 0;i<response.data.length;i++) {
         scores = scores + "<a href='http://facebook.com/" + response.data[i].user.id + "'>" +response.data[i].user.name +  "</a> " + response.data[i].score + "<br/><br/>";
       }
-      scores = scores + "</center>";
+      scores = scores;
       $(".scoreboard").html(scores);
     });
   }

@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="/css/style.css">
   </head>
   <body>
-    <div id='user-info'></div>
+    <div id='user-info' class='text-center'></div>
     <div id='select-category' style='margin:30px auto;width:300px;'>
       <select id='cselect'>
         {% for l in levels %}
@@ -21,7 +21,7 @@
     
     <div id="content" class="container" style="/*border:solid black 2px;*/width:580px;margin-left:-10px;"></div>
     
-    <div class='scoreboard' style='/*border:solid black 2px;*/width:150px;height:500px;margin-left:580px;margin-top:-270px;'>  </div>
+    <div class='scoreboard text-center' style='/*border:solid black 2px;*/width:150px;height:500px;margin-left:580px;margin-top:-270px;'>  </div>
     <!-- Level Info Template -->
     <script type='text/template' id='levelinfo-template'>
       <ul>
@@ -43,9 +43,9 @@
     </script>
     <!-- User Template -->
     <script type="text/template" id="user-template">
-      <center><img src="<%= profile_pic %>" width='50px' height='50px'></center>
-      <p align="center"><%= name %></p>
-       <% if(score != -1) { %> <center><%= score %></center> <% } %>  
+      <img src="<%= profile_pic %>" width='50px' height='50px'><br/>
+      <%= name %>
+       <% if(score != -1) { %> <%= score %> <% } %>  
     </script>
     <!-- Choice Template -->
     <script type="text/template" id="choice-template">
