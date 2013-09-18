@@ -537,9 +537,9 @@ def index():
   user = User.query.filter_by(api_key = api_key)[0]
   if user.name == "Anonymous":
     level = int(request.cookies.get('level'))
-    return render_template('play.html',categories=Category.query.all(),levels=range(level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = level)
+    return render_template('play.html',categories=Category.query.all(),levels=range(level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = level,app_id = APP_ID)
   else:
-    return render_template('play.html',categories=Category.query.all(),levels=range(user.level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = user.level)
+    return render_template('play.html',categories=Category.query.all(),levels=range(user.level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = user.level,app_id = APP_ID)
 
 
 
@@ -602,7 +602,7 @@ def updateachievement():
 
 @app.route('/',methods=['GET','POST'])
 def server_start():
-  return render_template('index.html')
+  return render_template('index.html',app_id = APP_ID)
 @app.route('/gameplay',methods=['GET','POST'])
 def game_play():
   return render_template('gameplay.html')

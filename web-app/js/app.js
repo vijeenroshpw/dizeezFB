@@ -219,7 +219,7 @@ function showFriendsScore() {
   //-- NOTE : app_id is used here. If application if changed this need to be changed
   
   if(user_name != "Anonymous") {
-    FB.api('/159866620823022/scores',function(response) { 
+    FB.api('/' + app_id + '/scores',function(response) { 
       //console.log(JSON.stringify(response));
       scores = " Score Board <hr/> <br/>"; 
       for(i = 0;i<response.data.length;i++) {
@@ -411,7 +411,7 @@ App.addInitializer(function() {
   window.fbAsyncInit = function() {
     //--  init the FB JS SDK
     FB.init({
-      appId      : '159866620823022',
+      appId      : app_id,
       status     : true,
       xfbml      : true
     });
