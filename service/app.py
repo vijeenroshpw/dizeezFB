@@ -83,7 +83,16 @@ def get_questions(api_key='',method=1):
     return (questions,1)
   #-- Action corresponding to method 2
   elif method == 2:
-    pass
+  #  pass
+    questions = []    
+    for c in Category.query.all():
+      question_list = c.questions
+      random.shuffle(question_list)
+      if len(question_list) > 30 :
+        question_list = question_list[0:30]
+      for q in question_list:
+        questions.append(q.question)
+    return (questions,2)
   #-- Action corresponding to method 3 etc,
 
   elif method == 3:
@@ -316,7 +325,7 @@ class Questions(Resource):
       #question_count = len(category.questions)
 
       #Currently method 1 is used. Later a selection process can be implemented
-      questions,method = get_questions(args['api_key'],1)
+      questions,method = get_questions(args['api_key'],2)         #Previously it was method 1
       question_count = len(questions)
       #if question_count > 10:          # 10 is given for testing purpose
       #  question_count = 10            # if its < 10 will not alter it.
@@ -535,11 +544,18 @@ admin.add_view(LogoutView(name="Logout"))
 def index():
   api_key=request.cookies.get('api_key')
   user = User.query.filter_by(api_key = api_key)[0]
+  category_dict = {}
+  
+  for c in Category.query.all():
+    category_dict[c.id] = c.text
+
+  categorylist = json.dumps(category_dict)
+  
   if user.name == "Anonymous":
     level = int(request.cookies.get('level'))
-    return render_template('play.html',categories=Category.query.all(),levels=range(level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = level,app_id = APP_ID)
+    return render_template('play.html',categories=Category.query.all(),levels=range(level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = level,app_id = APP_ID,category_dict = categorylist)
   else:
-    return render_template('play.html',categories=Category.query.all(),levels=range(user.level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = user.level,app_id = APP_ID)
+    return render_template('play.html',categories=Category.query.all(),levels=range(user.level,0,-1),fb_id=user.fb_id,user_name=user.name,latest_level = user.level,app_id = APP_ID,category_dict = categorylist)
 
 
 

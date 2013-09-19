@@ -223,7 +223,7 @@ function showFriendsScore() {
       //console.log(JSON.stringify(response));
       scores = " Score Board <hr/> <br/>"; 
       for(i = 0;i<response.data.length;i++) {
-        scores = scores + "<a href='http://facebook.com/" + response.data[i].user.id + "'>" +response.data[i].user.name +  "</a> " + response.data[i].score + "<br/><br/>";
+        scores = scores + "<a href='http://www.facebook.com/" + response.data[i].user.id + "'>" +response.data[i].user.name +  "</a> " + response.data[i].score + "<br/><br/>";
       }
       scores = scores;
       $(".scoreboard").html(scores);
@@ -247,7 +247,7 @@ function showPreviousScore() {
 
 function levelInfo() {
 lin  = new LevelView();
-lin.render({'level':level_name[playing_level],'num_quests':numQuestions,'correct_quests':numCorrect,'score':score,'num_try':numTry,'max_tries':MAXMARKINGS});
+lin.render({'level':level_name[playing_level.toString()],'num_quests':numQuestions,'correct_quests':numCorrect,'score':score,'num_try':numTry,'max_tries':MAXMARKINGS});
 }
 
 function selectCategory() {
@@ -354,7 +354,7 @@ var App = new Backbone.Marionette.Application(),
     numQuestions = 0,
     numCorrect = 0,
     MAXMARKINGS = 80,          //-- Maximum number of tries that user can try for passing a level. if numtry>80 level is not passed
-    level_name= {1:'canser',2:'Metabolism',3:'Immunology',4:'Mental Health',5:'Kineases',6:'Proteases',7:'Transcription Factor',8:'All Rounder'},
+    //level_name= {1:'canser',2:'Metabolism',3:'Immunology',4:'Mental Health',5:'Kineases',6:'Proteases',7:'Transcription Factor',8:'All Rounder'},
     profile_pic = $.cookie('profile_pic'),
     playing_level = 0,
     numTry = 0,

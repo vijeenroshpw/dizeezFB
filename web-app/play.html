@@ -11,7 +11,7 @@
     <div id='select-category' style='margin:30px auto;width:300px;'>
       <select id='cselect'>
         {% for l in levels %}
-          <option value='{{ l }}'> Level {{ l }} </option>
+          <option value='{{ l }}'> Level {{ l }} {{ categories[l-1].text }} </option>
         {% endfor %}
       </select><br/>
       <button onclick='selectCategory()'> Start </button> 
@@ -82,7 +82,8 @@
     var fb_id = "{{ fb_id }}",
       user_name = "{{ user_name }}",
       last_unlocked_level = {{ latest_level }},
-      app_id = '{{ app_id }}';
+      app_id = '{{ app_id }}',
+      level_name = {{ category_dict|safe }};
 
     </script> 
     
