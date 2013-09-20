@@ -62,7 +62,7 @@ admin = Admin(app ,index_view = AdminHomeView())
 
 #-- Global restful api handle
 api = Api(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = config.CONNECTION_URI
+app.config['SQLALCHEMY_DATABASE_URI'] =  config.CONNECTION_URI
 app.secret_key = 'a big secret key'
 db = SQLAlchemy(app)
 
@@ -91,7 +91,8 @@ def get_questions(api_key='',method=1):
       if len(question_list) > 30 :
         question_list = question_list[0:30]
       for q in question_list:
-        questions.append(q.question)
+        if q.question not in questions:
+          questions.append(q.question)
     return (questions,2)
   #-- Action corresponding to method 3 etc,
 

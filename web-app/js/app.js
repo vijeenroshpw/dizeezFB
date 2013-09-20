@@ -226,7 +226,7 @@ function showFriendsScore() {
         scores = scores + "<a href='http://www.facebook.com/" + response.data[i].user.id + "'>" +response.data[i].user.name +  "</a> " + response.data[i].score + "<br/><br/>";
       }
       scores = scores;
-      $(".scoreboard").html(scores);
+      $("#scoreboard").html(scores);
     });
   }
 }
@@ -340,7 +340,7 @@ function gameOver(choice) {
     }
     statusline = statusline + "<a href='/play'> Play Again </a>";
     $('.scoreboard').remove();
-    $('#content').html("<center>" + statusline + "</center>");
+    $('#content').html(  statusline );
  }
 }
   

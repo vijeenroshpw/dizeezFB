@@ -7,38 +7,41 @@
     <link rel="stylesheet" type="text/css" href="/css/style.css">
   </head>
   <body>
-    <div id='user-info' class='text-center'></div>
-    <div id='select-category' style='margin:30px auto;width:300px;'>
+    <div id='user-info' class='text-center'></div><br/>
+    <div class='row-fluid text-center' style=''>
+    <div id='select-category' class='span4' style='float:none;margin:0 auto;'>
       <select id='cselect'>
         {% for l in levels %}
           <option value='{{ l }}'> Level {{ l }} {{ categories[l-1].text }} </option>
         {% endfor %}
       </select><br/>
-      <button onclick='selectCategory()'> Start </button> 
+      <button onclick='selectCategory()'> Start </button> <br/>
+      <a href='/gameplay'> Game Rules </a>
     </div>
-    <div class='level-info'> </div>
+    </div>
+    <div class='level-info row-fluid'> </div>
 
     
-    <div id="content" class="container" style="/*border:solid black 2px;*/width:580px;margin-left:-10px;"></div>
+    <div id="content" class="container" style=""></div>
     
-    <div class='scoreboard text-center' style='/*border:solid black 2px;*/width:150px;height:500px;margin-left:580px;margin-top:-270px;'>  </div>
+    <!--<div class='scoreboard text-center' style='/*border:solid black 2px;*/width:150px;height:500px;margin-left:580px;margin-top:-270px;'>  </div> -->
     <!-- Level Info Template -->
     <script type='text/template' id='levelinfo-template'>
-      <ul>
-        <li> <a> Level : <%= level %> </a> </li>
-        <li> <a> Questions : <%= num_quests %> </a> </li>
-        <li> <a> Corrected : <%= correct_quests %> </a> </li>
-        <li> <a> Score :  <%= score %> </a> </li>
-        <li> <a> Tries : <%= num_try %> </a> </li>
-        <li> <a> MaxTries : <%= max_tries %> </a> </li>
+      
+        <div class='span2' >  Level : <%= level %>  </div>
+        <div class='span2'>  Questions : <%= num_quests %>  </div>
+        <div class='span2'>  Corrected : <%= correct_quests %>  </div>
+        <div class='span2'>  Score :  <%= score %>  </div>
+        <div class='span2'>  Tries : <%= num_try %>  </div>
+        <div class='span2'>  MaxTries : <%= max_tries %>  </div> 
       </ul>
     </script>    
     <!-- Game Template -->
     <script type="text/template" id="game-template">
-      <div class="row">
-        <div class="span4 game question"></div>
+      <div class="row-fluid text-center" style=''>
+        <div class="span4 game  question"></div>
         <div class="span2 game list" style="overflow-y:scroll;overflow-x:hidden;height:200px;width:200px;font-size:12px;"><ol></ol></div>
-        <div class="span2 game score" ></div>
+        <div class="span3 text-center" id='scoreboard'></div> 
       </div>
     </script>
     <!-- User Template -->

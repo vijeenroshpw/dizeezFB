@@ -1,5 +1,5 @@
 #content {
-  margin-top: 100px;
+  margin-top: 50px;
 }
 
 #choices label.radio {
@@ -20,7 +20,7 @@
   margin-left:600px; 
   margin-top:30px;  
 }
-.question {
+/*.question {
     margin-left:50px; 
    -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
@@ -29,10 +29,10 @@
     background-image:url('/img/gene.jpg');
     background-size:scale;
     box-shadow: 10px 10px 5px #888888;
-}
+}*/
 body {
-  background-image:url('/img/background1.jpg');
-  background-size:cover;
+ /* background-image:url('/img/background1.jpg');
+  background-size:cover;*/
 }
 .muted {
   color:red;
