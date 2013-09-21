@@ -6,9 +6,12 @@
       <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
   </head>
   <body>
+   <div class='container'>
+    <div class='row-fluid'>
+    <div class='span12'>
     <form>
       <legend> Add Questions </legend>
-      <table class="table" style="border:solid black 2px;width:600px;margin-left:300px;">
+      <table class="table" style="border:solid black 2px;width:600px;/*margin-left:300px;*/">
         <tbody>
           <tr>
             <td> Question Text :</td>
@@ -52,10 +55,14 @@
          </tbody>
        </table>
      </form>
+    </div>     <!-- end of span12 -->
+    </div>     <!-- end of row-fluid -->
      <br/>
+    <div class='row-fluid'>
+    <div class='span12'> 
      <form>
        <legend> Add Question to Category </legend>
-         <table class="table" style="border:solid black 2px;width:600px;margin-left:300px;">
+         <table class="table" style="border:solid black 2px;width:600px;/*margin-left:300px;*/">
            <thead>
              <tr>
                <th> Category </th>
@@ -77,6 +84,9 @@
           </tbody>
         </table>
       </form> 
+     </div>    <!-- end of span12 -->
+     </div>    <!-- end of row-fluid -->
+
      <script type='text/javascript'>
          
          var numCategory = 1,

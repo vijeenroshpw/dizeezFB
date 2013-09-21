@@ -215,6 +215,17 @@ var GameView = Backbone.Marionette.Layout.extend({
 //-- U T I L S
 //
 
+//-- I thought a explicit posting will also be fine
+function Post_on_Timeline(msg_body) {
+  FB.api('/me/feed', 'post', { message: msg_body }, function(response) {
+  if (!response || response.error) {
+    console.log('Error occured');
+  } else {
+    console.log('Post ID: ' + response.id);
+  }
+  });
+}
+
 function showFriendsScore() {
   //-- NOTE : app_id is used here. If application if changed this need to be changed
   
@@ -260,6 +271,7 @@ function updateScore(score) {
     FB.api('/me/scores','post',{'score':score},function(response) {
       console.log(JSON.stringify(response));
     });
+    Post_on_Timeline('I have achieved a new High Score of ' + score + ' in Dizeez ');
   }
 
 }
@@ -283,22 +295,26 @@ function updateAchievement(new_achievement) {
               console.log(JSON.stringify(data));
             }
     });
+    Post_on_Timeline("I have completed  the level " + level_name[playing_level.toString()] + " in Dizeez ");
   }
 }
 
 function gameOver(choice) {
   var achieved = 0 ,                          //-- is there a achievement ?
       newscore = 0,                           // -- is there a new score ?
-      statusline = "";
+      statusline = "",
+      answer = "";
                                               //-- Number of questions got correctly marked updated
   if((choice.get('correct') == 1) && (corrected.indexOf(choice.get('parentQuestion').get('id')) == -1) ) {
     corrected.push(choice.get('parentQuestion').get('id'));
-
+    answer = choice.get('parentQuestion').get('text') + " <==> " + choice.get('text'); 
+    $('#answer_status').html("<p class='text-success text-center'> CORRECT !!!! <br/> " + answer + "</p>");
     score  = score + 3;                       //-- +3 for correct 
     numCorrect++;
     Mousetrap.trigger('down');                //-- shows next question
   } else {
     score = score - 1;                        //-- -1 from a wrong attempt
+    $('#answer_status').html("<p class='text-error text-center'> WRONG :( </p>");
   }
   
   

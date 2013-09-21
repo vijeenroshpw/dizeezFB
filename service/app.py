@@ -88,8 +88,8 @@ def get_questions(api_key='',method=1):
     for c in Category.query.all():
       question_list = c.questions
       random.shuffle(question_list)
-      if len(question_list) > 30 :
-        question_list = question_list[0:30]
+      if len(question_list) > 20 :
+        question_list = question_list[0:20]
       for q in question_list:
         if q.question not in questions:
           questions.append(q.question)
